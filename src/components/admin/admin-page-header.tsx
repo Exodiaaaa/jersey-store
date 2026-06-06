@@ -15,7 +15,7 @@ export function AdminPageHeader({
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="text-sm font-semibold uppercase text-lime-200">Back office</p>
+        <p className="text-sm font-semibold uppercase text-amber-200">Back office</p>
         <h1 className="mt-2 text-3xl font-black text-white">{title}</h1>
         {description && <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">{description}</p>}
         {children}

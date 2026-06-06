@@ -41,7 +41,7 @@ export function ConfirmDialog({
               "grid h-11 w-11 shrink-0 place-items-center rounded-lg border",
               tone === "danger"
                 ? "border-red-400/35 bg-red-500/12 text-red-100"
-                : "border-lime-300/35 bg-lime-300/12 text-lime-100",
+                : "border-amber-300/35 bg-amber-300/12 text-amber-100",
             ].join(" ")}
           >
             <AlertTriangle size={22} />

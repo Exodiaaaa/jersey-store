@@ -55,7 +55,7 @@ export function CartView() {
                     <p className="text-zinc-300">
                       {item.flocking.player ?? item.flocking.name} {item.flocking.number ? `#${item.flocking.number}` : ""}
                     </p>
-                    <p className="font-semibold text-lime-100">Avance demandee avant preparation.</p>
+                    <p className="font-semibold text-amber-100">Avance demandee avant preparation.</p>
                   </div>
                 )}
               </div>
@@ -101,7 +101,7 @@ export function CartView() {
           </div>
         </div>
         {hasFlockingAdvance && (
-          <p className="mt-4 rounded-lg border border-lime-300/25 bg-lime-300/10 p-3 text-sm font-semibold text-lime-100">
+          <p className="mt-4 rounded-lg border border-amber-300/25 bg-amber-300/10 p-3 text-sm font-semibold text-amber-100">
             Cette commande contient du flocage : une avance sera demandee avant preparation.
           </p>
         )}

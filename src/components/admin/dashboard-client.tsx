@@ -39,7 +39,7 @@ export function DashboardClient() {
           const Icon = card.icon;
           return (
             <div className="rounded-lg border border-white/10 bg-white/[0.04] p-5" key={card.label}>
-              <Icon className="text-lime-200" size={24} />
+              <Icon className="text-amber-200" size={24} />
               <p className="mt-4 text-sm text-zinc-500">{card.label}</p>
               <p className="mt-1 text-3xl font-black text-white">{card.value}</p>
             </div>
@@ -73,7 +73,7 @@ export function DashboardClient() {
             {stats.recentOrders.length === 0 && <p className="text-sm text-zinc-500">Aucune commande enregistrée.</p>}
             {stats.recentOrders.map((order) => (
               <Link
-                className="grid gap-2 rounded-lg border border-white/10 bg-zinc-950/60 p-3 transition hover:border-lime-300/30"
+                className="grid gap-2 rounded-lg border border-white/10 bg-zinc-950/60 p-3 transition hover:border-amber-300/30"
                 href={`/admin/commandes/${order.id}`}
                 key={order.id}
               >

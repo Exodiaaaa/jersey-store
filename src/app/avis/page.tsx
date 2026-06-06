@@ -14,7 +14,7 @@ function RatingStars({ rating }: { rating: number }) {
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((value) => (
         <Star
-          className={value <= rating ? "fill-lime-300 text-lime-300" : "text-zinc-700"}
+          className={value <= rating ? "fill-amber-300 text-amber-300" : "text-zinc-700"}
           key={value}
           size={16}
         />
@@ -88,7 +88,7 @@ export default async function ReviewsPage() {
 
             return (
               <article
-                className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] transition hover:border-lime-300/30 hover:bg-white/[0.06]"
+                className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] transition hover:border-amber-300/30 hover:bg-white/[0.06]"
                 key={review.id}
               >
                 <Link href={`/produit/${review.product.slug}`}>
@@ -111,10 +111,10 @@ export default async function ReviewsPage() {
                     </div>
                     <RatingStars rating={review.rating} />
                   </div>
-                  <p className="text-sm font-bold text-lime-100">{review.customerName}</p>
+                  <p className="text-sm font-bold text-amber-100">{review.customerName}</p>
                   <p className="text-sm leading-6 text-zinc-300">{review.comment}</p>
                   <Link
-                    className="inline-flex text-sm font-semibold text-zinc-200 transition hover:text-lime-200"
+                    className="inline-flex text-sm font-semibold text-zinc-200 transition hover:text-amber-200"
                     href={`/produit/${review.product.slug}`}
                   >
                     Voir le produit

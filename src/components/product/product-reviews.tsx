@@ -27,7 +27,7 @@ function RatingStars({
         const isActive = value <= rating;
         const Icon = (
           <Star
-            className={isActive ? "fill-lime-300 text-lime-300" : "text-zinc-600"}
+            className={isActive ? "fill-amber-300 text-amber-300" : "text-zinc-600"}
             size={interactive ? 22 : 16}
           />
         );
@@ -92,7 +92,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
     <section className="mt-10 rounded-lg border border-white/10 bg-white/[0.04] p-5">
       <div className="flex flex-col gap-4 border-b border-white/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase text-lime-200">Avis clients</p>
+          <p className="text-sm font-semibold uppercase text-amber-200">Avis clients</p>
           <h2 className="mt-2 text-2xl font-black text-white">Ce que pensent les clients</h2>
         </div>
         <div className="rounded-lg border border-white/10 bg-zinc-950/70 p-3">

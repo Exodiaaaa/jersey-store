@@ -63,7 +63,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                   aria-label={`Voir photo ${index + 1}`}
                   className={[
                     "aspect-square rounded-lg border bg-cover bg-center transition",
-                    image === selectedImage ? "border-lime-300" : "border-white/10 hover:border-white/30",
+                    image === selectedImage ? "border-amber-300" : "border-white/10 hover:border-white/30",
                   ].join(" ")}
                   key={`${image}-${index}`}
                   onClick={() => setSelectedImage(image)}
@@ -96,7 +96,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     className={[
                       "h-11 rounded-lg border text-sm font-bold transition",
                       item === size
-                        ? "border-lime-300 bg-lime-300 text-zinc-950"
+                        ? "border-amber-300 bg-amber-300 text-zinc-950"
                         : "border-white/10 bg-zinc-950 text-zinc-200 hover:border-white/25",
                       disabled ? "cursor-not-allowed opacity-40" : "",
                     ].join(" ")}
@@ -121,7 +121,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                   className={[
                     "rounded-lg border p-3 text-left transition",
                     item === type
-                      ? "border-lime-300 bg-lime-300 text-zinc-950"
+                      ? "border-amber-300 bg-amber-300 text-zinc-950"
                       : "border-white/10 bg-zinc-950 text-zinc-200 hover:border-white/25",
                   ].join(" ")}
                   key={item}
@@ -151,7 +151,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     className={[
                       "h-11 rounded-lg border px-3 text-sm font-bold transition",
                       flockingMode === value
-                        ? "border-lime-300 bg-lime-300 text-zinc-950"
+                        ? "border-amber-300 bg-amber-300 text-zinc-950"
                         : "border-white/10 bg-zinc-950 text-zinc-200 hover:border-white/25",
                     ].join(" ")}
                     key={value}
@@ -195,7 +195,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                       value={flockingNote}
                     />
                   </div>
-                  <p className="rounded-lg border border-lime-300/25 bg-lime-300/10 p-3 text-sm font-semibold text-lime-100 sm:col-span-2">
+                  <p className="rounded-lg border border-amber-300/25 bg-amber-300/10 p-3 text-sm font-semibold text-amber-100 sm:col-span-2">
                     Une avance est demandee avant preparation pour toute commande avec flocage.
                   </p>
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Gauge,
   Layers3,
@@ -26,6 +26,7 @@ const adminNav = [
 ];
 
 export function AdminShell({ children }: PropsWithChildren) {
+  const router = useRouter();
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
   const session = useMemo(
@@ -38,9 +39,9 @@ export function AdminShell({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (!isLoginPage && !session) {
-      window.location.href = "/admin/login";
+      router.replace("/admin/login");
     }
-  }, [isLoginPage, session]);
+  }, [isLoginPage, router, session]);
 
   if (isLoginPage) {
     return <>{children}</>;
@@ -48,7 +49,7 @@ export function AdminShell({ children }: PropsWithChildren) {
 
   const logout = () => {
     logoutAdmin();
-    window.location.href = "/admin/login";
+    router.replace("/admin/login");
   };
 
   if (!session) {
@@ -72,7 +73,7 @@ export function AdminShell({ children }: PropsWithChildren) {
                 className={[
                   "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition",
                   active
-                    ? "bg-lime-300 text-zinc-950"
+                    ? "bg-amber-300 text-zinc-950"
                     : "text-zinc-300 hover:bg-white/[0.08] hover:text-white",
                 ].join(" ")}
                 href={item.href}

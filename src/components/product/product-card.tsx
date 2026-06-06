@@ -9,13 +9,19 @@ import { ProductMedia } from "@/components/product/product-media";
 
 type ProductCardProps = {
   product: Product;
+  className?: string;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, className = "" }: ProductCardProps) {
   const startingPrice = product.categoryId === "pack" ? product.packPrice : product.basePrice;
 
   return (
-    <article className="group overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] transition hover:border-lime-300/35 hover:bg-white/[0.06]">
+    <article
+      className={[
+        "group overflow-hidden rounded-lg border border-cyan-100/12 bg-[#0b1b1e]/82 shadow-[0_14px_38px_rgba(0,0,0,0.26)] transition hover:border-amber-300/35 hover:bg-[#10272b]",
+        className,
+      ].join(" ")}
+    >
       <Link className="block" href={`/produit/${product.slug}`}>
         <ProductMedia
           className="rounded-none border-0"
@@ -43,8 +49,8 @@ export function ProductCard({ product }: ProductCardProps) {
             <p className="text-xs text-zinc-500">À partir de</p>
             <p className="text-xl font-black text-white">{formatPrice(startingPrice)}</p>
           </div>
-          <LinkButton href={`/produit/${product.slug}`} size="sm" variant="secondary">
-            Détails
+          <LinkButton href={`/produit/${product.slug}`} size="sm">
+            Commander
             <ArrowRight size={16} />
           </LinkButton>
         </div>

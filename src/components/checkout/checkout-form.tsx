@@ -53,7 +53,7 @@ export function CheckoutForm() {
         <div className="mb-6">
           <h1 className="text-3xl font-black text-white">Validation commande</h1>
           {hasFlockingAdvance && (
-            <p className="mt-4 rounded-lg border border-lime-300/25 bg-lime-300/10 p-3 text-sm font-semibold text-lime-100">
+            <p className="mt-4 rounded-lg border border-amber-300/25 bg-amber-300/10 p-3 text-sm font-semibold text-amber-100">
               Flocage detecte : une avance est demandee avant preparation.
             </p>
           )}
@@ -116,7 +116,7 @@ export function CheckoutForm() {
             <div className="border-b border-white/10 pb-4" key={item.id}>
               <p className="font-bold text-white">{item.productName}</p>
               {item.flocking.mode !== "none" && (
-                <p className="mt-2 text-sm font-semibold text-lime-100">Avance flocage requise.</p>
+                <p className="mt-2 text-sm font-semibold text-amber-100">Avance flocage requise.</p>
               )}
               <p className="mt-1 text-sm text-zinc-400">
                 {item.quantity} × {item.size} · {item.type === "pack" ? "Pack" : "Maillot"}

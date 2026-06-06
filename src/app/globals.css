@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #f4f4f5;
+  --background: #071214;
+  --foreground: #f8fafc;
 }
 
 @theme inline {
@@ -24,8 +24,8 @@ body {
 
 body::before {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(245, 158, 11, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.035) 1px, transparent 1px);
   background-size: 42px 42px;
   content: "";
   inset: 0;
@@ -36,8 +36,16 @@ body::before {
 }
 
 ::selection {
-  background: #bef264;
-  color: #050505;
+  background: #f59e0b;
+  color: #071214;
+}
+
+.kvn-rail-scroll {
+  scrollbar-width: none;
+}
+
+.kvn-rail-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 input,
@@ -48,6 +56,6 @@ button {
 }
 
 option {
-  background: #09090b;
+  background: #071214;
   color: #fafafa;
 }

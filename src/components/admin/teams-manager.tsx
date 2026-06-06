@@ -22,7 +22,7 @@ function slugify(value: string) {
 
 export function TeamsManager() {
   const [items, setItems] = useState<Team[]>(teams);
-  const [draft, setDraft] = useState({ name: "", league: "", country: "", accent: "#bef264" });
+  const [draft, setDraft] = useState({ name: "", league: "", country: "", accent: "#f59e0b" });
   const [pendingAction, setPendingAction] = useState<
     | { team: Team; type: "add" }
     | { team: Team; type: "delete" }
@@ -63,7 +63,7 @@ export function TeamsManager() {
     if (pendingAction.type === "add") {
       const savedTeam = await clientApi.createTeam(pendingAction.team);
       setItems((current) => [...current, savedTeam]);
-      setDraft({ name: "", league: "", country: "", accent: "#bef264" });
+      setDraft({ name: "", league: "", country: "", accent: "#f59e0b" });
     }
 
     if (pendingAction.type === "save") {

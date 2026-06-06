@@ -138,7 +138,7 @@ export function CatalogueClient() {
       <section className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase text-lime-200">Catalogue</p>
+            <p className="text-sm font-semibold uppercase text-amber-200">Catalogue</p>
             <h1 className="mt-1 text-2xl font-black text-white sm:text-3xl">Trouver une tenue</h1>
           </div>
           <div className="flex gap-2">
@@ -233,7 +233,7 @@ export function CatalogueClient() {
             <div className="space-y-3">
               <Label htmlFor="price">Prix max : {filters.maxPrice} MAD</Label>
               <input
-                className="h-2 w-full accent-lime-300"
+                className="h-2 w-full accent-amber-300"
                 id="price"
                 max="450"
                 min="100"

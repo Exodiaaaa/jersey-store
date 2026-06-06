@@ -10,11 +10,12 @@ export const adminCredentials = {
 };
 
 export function loginAdmin(email: string, password: string) {
-  const isValid = email === adminCredentials.email && password === adminCredentials.password;
+  const normalizedEmail = email.trim().toLowerCase();
+  const isValid = normalizedEmail === adminCredentials.email && password.trim() === adminCredentials.password;
 
   if (isValid) {
     writeStorage(adminSessionKey, {
-      email,
+      email: normalizedEmail,
       loggedAt: new Date().toISOString(),
     });
   }

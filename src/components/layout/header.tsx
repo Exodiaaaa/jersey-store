@@ -32,7 +32,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/86 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-cyan-100/10 bg-[#071214]/90 backdrop-blur-xl">
       <div className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo />
 
@@ -41,7 +41,7 @@ export function Header() {
             <Link
               className={[
                 "rounded-lg px-3 py-2 text-sm font-medium transition",
-                pathname === item.href ? "bg-white/10 text-white" : "text-zinc-300 hover:bg-white/8 hover:text-white",
+                pathname === item.href ? "bg-amber-300 text-[#071214]" : "text-zinc-300 hover:bg-cyan-100/8 hover:text-white",
               ].join(" ")}
               href={item.href}
               key={item.href}
@@ -74,11 +74,11 @@ export function Header() {
       </div>
 
       {isOpen && (
-        <div className="border-t border-white/10 px-4 py-4 md:hidden">
+        <div className="border-t border-cyan-100/10 px-4 py-4 md:hidden">
           <nav className="mx-auto grid max-w-7xl gap-2">
             {navItems.map((item) => (
               <Link
-                className="rounded-lg px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/8"
+                className="rounded-lg px-3 py-3 text-sm font-semibold text-zinc-200 hover:bg-cyan-100/8"
                 href={item.href}
                 key={item.href}
                 onClick={() => setIsOpen(false)}

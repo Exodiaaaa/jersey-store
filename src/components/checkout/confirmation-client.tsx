@@ -32,7 +32,7 @@ export function ConfirmationClient() {
 
   return (
     <section className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center sm:px-6">
-      <div className="grid h-16 w-16 place-items-center rounded-lg border border-lime-300/35 bg-lime-300/12 text-lime-200">
+      <div className="grid h-16 w-16 place-items-center rounded-lg border border-amber-300/35 bg-amber-300/12 text-amber-200">
         <CheckCircle2 size={34} />
       </div>
       <h1 className="mt-6 text-3xl font-black text-white">Commande enregistrée</h1>

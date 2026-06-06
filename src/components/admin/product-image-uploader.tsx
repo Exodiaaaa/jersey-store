@@ -78,8 +78,8 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
         className={[
           "flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed p-5 text-center transition",
           isDragging
-            ? "border-lime-300 bg-lime-300/10"
-            : "border-white/15 bg-zinc-950/70 hover:border-lime-300/40",
+            ? "border-amber-300 bg-amber-300/10"
+            : "border-white/15 bg-zinc-950/70 hover:border-amber-300/40",
         ].join(" ")}
         htmlFor="product-images"
         onDragEnter={() => setIsDragging(true)}
@@ -95,7 +95,7 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
           onChange={handleInputChange}
           type="file"
         />
-        <span className="grid h-12 w-12 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-lime-200">
+        <span className="grid h-12 w-12 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-amber-200">
           {isReading ? <UploadCloud size={24} /> : <ImagePlus size={24} />}
         </span>
         <span className="mt-3 text-sm font-bold text-white">

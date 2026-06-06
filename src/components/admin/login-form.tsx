@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Lock, LogIn, Mail } from "lucide-react";
 import { loginAdmin } from "@/lib/admin-auth";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import { Input, Label } from "@/components/ui/field";
 import { Logo } from "@/components/ui/logo";
 
 export function AdminLoginForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,7 +21,7 @@ export function AdminLoginForm() {
       return;
     }
 
-    router.push("/admin/dashboard");
+    window.location.assign("/admin/dashboard");
   };
 
   return (

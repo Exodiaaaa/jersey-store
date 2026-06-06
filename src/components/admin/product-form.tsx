@@ -276,7 +276,7 @@ export function ProductForm({ productId }: ProductFormProps) {
                   className={[
                     "space-y-3 rounded-lg border p-3 transition",
                     isActive
-                      ? "border-lime-300/50 bg-lime-300/10"
+                      ? "border-amber-300/50 bg-amber-300/10"
                       : "border-white/10 bg-zinc-950/60 opacity-70",
                   ].join(" ")}
                   key={size}
@@ -284,7 +284,7 @@ export function ProductForm({ productId }: ProductFormProps) {
                   <label className="flex items-center gap-2 text-sm font-bold text-white">
                     <input
                       checked={isActive}
-                      className="h-4 w-4 accent-lime-300"
+                      className="h-4 w-4 accent-amber-300"
                       onChange={() => toggleSize(size)}
                       type="checkbox"
                     />
@@ -322,7 +322,7 @@ export function ProductForm({ productId }: ProductFormProps) {
             >
               <input
                 checked={Boolean(product[key as keyof Product])}
-                className="h-4 w-4 accent-lime-300"
+                className="h-4 w-4 accent-amber-300"
                 onChange={(event) => updateProduct(key as keyof Product, event.target.checked as never)}
                 type="checkbox"
               />

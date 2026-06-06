@@ -28,7 +28,7 @@ export function ProductMedia({ name, images = [], image, className = "" }: Produ
         ].join(" ")}
         role="img"
       >
-        <span className="grid h-12 w-12 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-lime-200">
+        <span className="grid h-12 w-12 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-amber-200">
           <ImagePlus size={24} />
         </span>
         <span className="mt-3 text-sm font-bold text-white">Photo à ajouter</span>
