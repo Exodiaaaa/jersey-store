@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Gauge,
   Layers3,
+  LayoutTemplate,
   LogOut,
   Package,
   ShieldCheck,
@@ -19,10 +20,11 @@ import { Logo } from "@/components/ui/logo";
 
 const adminNav = [
   { href: "/admin/dashboard", label: "Dashboard", icon: Gauge },
+  { href: "/admin/accueil", label: "Accueil", icon: LayoutTemplate },
   { href: "/admin/produits", label: "Produits", icon: Package },
   { href: "/admin/commandes", label: "Commandes", icon: ShoppingBasket },
-  { href: "/admin/categories", label: "Catégories", icon: Layers3 },
-  { href: "/admin/equipes", label: "Équipes", icon: Users },
+  { href: "/admin/categories", label: "Categories", icon: Layers3 },
+  { href: "/admin/equipes", label: "Equipes", icon: Users },
 ];
 
 export function AdminShell({ children }: PropsWithChildren) {
@@ -55,7 +57,7 @@ export function AdminShell({ children }: PropsWithChildren) {
   if (!session) {
     return (
       <div className="grid min-h-screen place-items-center bg-zinc-950 px-4 text-center text-sm text-zinc-400">
-        Vérification de la session admin...
+        Verification de la session admin...
       </div>
     );
   }
@@ -87,7 +89,7 @@ export function AdminShell({ children }: PropsWithChildren) {
         </nav>
         <button className={buttonClassName("ghost", "md", "absolute bottom-5 left-5 right-5")} onClick={logout} type="button">
           <LogOut size={18} />
-          Déconnexion
+          Deconnexion
         </button>
       </aside>
 

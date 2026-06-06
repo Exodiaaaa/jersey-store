@@ -8,15 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { clientApi } from "@/lib/client-api";
 import { formatPrice } from "@/lib/format";
-import { Product } from "@/lib/types";
+import { HomeSection, Product } from "@/lib/types";
 
 type HomeSectionProps = {
+  subtitle?: string;
   title: string;
   products: Product[];
   tone?: "solid" | "soft";
 };
 
-function HomeProductSection({ title, products, tone = "solid" }: HomeSectionProps) {
+type HomeDisplaySection = HomeSectionProps;
+
+function HomeProductSection({ title, subtitle, products, tone = "solid" }: HomeSectionProps) {
   if (products.length === 0) {
     return null;
   }
@@ -25,9 +28,12 @@ function HomeProductSection({ title, products, tone = "solid" }: HomeSectionProp
     <section className={tone === "soft" ? "border-y border-white/10 bg-white/[0.025]" : ""}>
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-5 flex items-center justify-between gap-4">
-          <h2 className="text-3xl font-black uppercase leading-none tracking-normal text-white sm:text-4xl lg:text-5xl">
-            {title}
-          </h2>
+          <div>
+            <h2 className="text-3xl font-black uppercase leading-none tracking-normal text-white sm:text-4xl lg:text-5xl">
+              {title}
+            </h2>
+            {subtitle && <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-400">{subtitle}</p>}
+          </div>
           <LinkButton href="/catalogue" variant="ghost">
             Voir tout
             <ArrowRight size={17} />
@@ -49,6 +55,7 @@ function HomeProductSection({ title, products, tone = "solid" }: HomeSectionProp
 
 export default function Home() {
   const [storeProducts, setStoreProducts] = useState<Product[]>(products);
+  const [homeSections, setHomeSections] = useState<HomeSection[]>([]);
   const [heroIndex, setHeroIndex] = useState(0);
 
   const popularProducts = useMemo(
@@ -76,6 +83,44 @@ export default function Home() {
         .slice(0, 8),
     [storeProducts],
   );
+  const defaultHomeSections = useMemo<HomeDisplaySection[]>(
+    () => [
+      {
+        products: jerseys.length > 0 ? jerseys : storeProducts.slice(0, 8),
+        title: "MAILLOTS",
+      },
+      {
+        products: packs,
+        title: "ENSEMBLES",
+        tone: "soft",
+      },
+      {
+        products: newProducts,
+        title: "NOUVELLE COLLECTION",
+      },
+      {
+        products: selectionProducts,
+        title: "SELECTIONS 2026",
+        tone: "soft",
+      },
+    ],
+    [jerseys, newProducts, packs, selectionProducts, storeProducts],
+  );
+  const configuredHomeSections = useMemo<HomeDisplaySection[]>(
+    () =>
+      homeSections
+        .filter((section) => section.isActive && section.products.length > 0)
+        .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title))
+        .map((section, index) => ({
+          products: section.products,
+          subtitle: section.subtitle,
+          title: section.title,
+          tone: index % 2 === 1 ? "soft" : "solid",
+        })),
+    [homeSections],
+  );
+  const displayedHomeSections =
+    configuredHomeSections.length > 0 ? configuredHomeSections : defaultHomeSections;
   const heroProducts = useMemo(
     () => storeProducts.filter((product) => product.images.length > 0).slice(0, 7),
     [storeProducts],
@@ -85,6 +130,7 @@ export default function Home() {
 
   useEffect(() => {
     clientApi.getProducts().then(setStoreProducts).catch(() => undefined);
+    clientApi.getHomeSections().then(setHomeSections).catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -193,10 +239,15 @@ export default function Home() {
         </div>
       </section>
 
-      <HomeProductSection products={jerseys.length > 0 ? jerseys : storeProducts.slice(0, 8)} title="MAILLOTS" />
-      <HomeProductSection products={packs} title="ENSEMBLES" tone="soft" />
-      <HomeProductSection products={newProducts} title="NOUVELLE COLLECTION" />
-      <HomeProductSection products={selectionProducts} title="SELECTIONS 2026" tone="soft" />
+      {displayedHomeSections.map((section) => (
+        <HomeProductSection
+          key={section.title}
+          products={section.products}
+          subtitle={section.subtitle}
+          title={section.title}
+          tone={section.tone}
+        />
+      ))}
 
       <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
         <div className="grid gap-5 rounded-lg border border-amber-300/20 bg-[#081416] p-6 sm:grid-cols-[1fr_auto] sm:items-center">

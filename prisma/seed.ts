@@ -24,6 +24,45 @@ const reviews = [
   },
 ];
 
+const defaultHomeSections = [
+  {
+    id: "home-maillots",
+    title: "MAILLOTS",
+    subtitle: "Les maillots les plus demandes.",
+    isActive: true,
+    sortOrder: 1,
+    productIds: products.filter((product) => product.categoryId === "jersey").map((product) => product.id),
+  },
+  {
+    id: "home-ensembles",
+    title: "ENSEMBLES",
+    subtitle: "Packs maillot + short prets a commander.",
+    isActive: true,
+    sortOrder: 2,
+    productIds: products.filter((product) => product.categoryId === "pack").map((product) => product.id),
+  },
+  {
+    id: "home-nouveautes",
+    title: "NOUVELLE COLLECTION",
+    subtitle: "Les derniers arrivages disponibles.",
+    isActive: true,
+    sortOrder: 3,
+    productIds: products.filter((product) => product.isNew).map((product) => product.id),
+  },
+  {
+    id: "home-selection-2026",
+    title: "SELECTIONS 2026",
+    subtitle: "Tenues fortes pour les grandes competitions.",
+    isActive: true,
+    sortOrder: 4,
+    productIds: products
+      .filter((product) => product.teamId === "mexico" || product.name.toLowerCase().includes("mexique"))
+      .concat(products.filter((product) => product.isPopular))
+      .filter((product, index, current) => current.findIndex((item) => item.id === product.id) === index)
+      .map((product) => product.id),
+  },
+];
+
 async function main() {
   for (const category of categories) {
     await prisma.category.upsert({
@@ -138,6 +177,36 @@ async function main() {
 
     if (existingReviewCount === 0) {
       await prisma.productReview.create({ data: review });
+    }
+  }
+
+  for (const section of defaultHomeSections) {
+    await prisma.homeSection.upsert({
+      create: {
+        id: section.id,
+        isActive: section.isActive,
+        sortOrder: section.sortOrder,
+        subtitle: section.subtitle,
+        title: section.title,
+      },
+      update: {
+        isActive: section.isActive,
+        sortOrder: section.sortOrder,
+        subtitle: section.subtitle,
+        title: section.title,
+      },
+      where: { id: section.id },
+    });
+
+    await prisma.homeSectionProduct.deleteMany({ where: { sectionId: section.id } });
+    if (section.productIds.length > 0) {
+      await prisma.homeSectionProduct.createMany({
+        data: section.productIds.map((productId, index) => ({
+          productId,
+          sectionId: section.id,
+          sortOrder: index,
+        })),
+      });
     }
   }
 }

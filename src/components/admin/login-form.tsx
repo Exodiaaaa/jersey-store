@@ -1,9 +1,9 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { Lock, LogIn, Mail } from "lucide-react";
+import { ArrowLeft, Lock, LogIn, Mail } from "lucide-react";
 import { loginAdmin } from "@/lib/admin-auth";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/field";
 import { Logo } from "@/components/ui/logo";
 
@@ -67,6 +67,10 @@ export function AdminLoginForm() {
           <LogIn size={19} />
           Se connecter
         </Button>
+        <LinkButton className="mt-3 w-full" href="/" size="lg" variant="secondary">
+          <ArrowLeft size={19} />
+          Retour accueil
+        </LinkButton>
       </form>
     </section>
   );

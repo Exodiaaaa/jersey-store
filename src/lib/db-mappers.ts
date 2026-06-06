@@ -1,4 +1,4 @@
-import { CartItem, Category, Order, OrderItem, OrderStatus, Product, Size, Team } from "@/lib/types";
+import { CartItem, Category, HomeSection, Order, OrderItem, OrderStatus, Product, Size, Team } from "@/lib/types";
 
 type DbProduct = {
   id: string;
@@ -35,6 +35,20 @@ type DbOrder = {
   whatsappMessage: string;
   createdAt: Date;
   items: DbOrderItem[];
+};
+
+type DbHomeSection = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: Date;
+  products: Array<{
+    productId: string;
+    sortOrder: number;
+    product: DbProduct;
+  }>;
 };
 
 type DbOrderItem = {
@@ -119,6 +133,21 @@ export function mapDbCategory(category: Category): Category {
 
 export function mapDbTeam(team: Team): Team {
   return team;
+}
+
+export function mapDbHomeSection(section: DbHomeSection): HomeSection {
+  const sortedProducts = [...section.products].sort((a, b) => a.sortOrder - b.sortOrder);
+
+  return {
+    id: section.id,
+    title: section.title,
+    subtitle: section.subtitle ?? undefined,
+    isActive: section.isActive,
+    sortOrder: section.sortOrder,
+    productIds: sortedProducts.map((item) => item.productId),
+    products: sortedProducts.map((item) => mapDbProduct(item.product)),
+    createdAt: section.createdAt.toISOString(),
+  };
 }
 
 export function mapDbOrderItem(item: DbOrderItem): OrderItem {

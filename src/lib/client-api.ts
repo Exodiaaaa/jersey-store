@@ -5,6 +5,8 @@ import {
   Category,
   Customer,
   DashboardStats,
+  HomeSection,
+  HomeSectionInput,
   Order,
   OrderStatus,
   Product,
@@ -125,5 +127,25 @@ export const clientApi = {
   },
   getDashboardStats() {
     return request<DashboardStats>("/api/dashboard");
+  },
+  getHomeSections() {
+    return request<HomeSection[]>("/api/home-sections");
+  },
+  createHomeSection(section: HomeSectionInput) {
+    return request<HomeSection>("/api/home-sections", {
+      body: JSON.stringify(section),
+      method: "POST",
+    });
+  },
+  updateHomeSection(id: string, section: HomeSectionInput) {
+    return request<HomeSection>(`/api/home-sections/${id}`, {
+      body: JSON.stringify(section),
+      method: "PUT",
+    });
+  },
+  deleteHomeSection(id: string) {
+    return request<{ ok: true }>(`/api/home-sections/${id}`, {
+      method: "DELETE",
+    });
   },
 };

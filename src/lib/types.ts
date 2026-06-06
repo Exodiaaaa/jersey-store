@@ -57,6 +57,26 @@ export type Product = {
   createdAt: string;
 };
 
+export type HomeSection = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  isActive: boolean;
+  sortOrder: number;
+  productIds: string[];
+  products: Product[];
+  createdAt: string;
+};
+
+export type HomeSectionInput = {
+  id?: string;
+  title: string;
+  subtitle?: string;
+  isActive: boolean;
+  sortOrder: number;
+  productIds: string[];
+};
+
 export type ProductReview = {
   id: number;
   productId: string;
