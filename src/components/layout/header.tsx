@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, MessageCircle, ShieldCheck, ShoppingBag, X } from "lucide-react";
+import { Menu, ShoppingBag, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { whatsappPhoneNumber } from "@/data/catalog";
 import { logoutAdmin } from "@/lib/admin-auth";
 import { useCart } from "@/lib/cart-context";
 import { buttonClassName } from "@/components/ui/button";
@@ -53,13 +52,6 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Link className={buttonClassName("secondary", "md")} href={`https://wa.me/${whatsappPhoneNumber}`}>
-            <MessageCircle size={18} />
-            WhatsApp
-          </Link>
-          <Link aria-label="Admin" className={buttonClassName("secondary", "icon")} href="/admin/login">
-            <ShieldCheck size={18} />
-          </Link>
           <Link className={buttonClassName("primary", "md", "relative")} href="/panier">
             <ShoppingBag size={18} />
             Panier

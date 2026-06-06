@@ -3,6 +3,7 @@ import { Product, ProductCategoryId, ProductType, Size } from "@/lib/types";
 
 export type ProductFilters = {
   query?: string;
+  league?: string;
   team?: string;
   category?: ProductCategoryId | "all";
   size?: Size | "all";
@@ -49,7 +50,10 @@ export function getFilteredProducts(filters: ProductFilters) {
       !query ||
       product.name.toLowerCase().includes(query) ||
       productTeam?.name.toLowerCase().includes(query) ||
+      productTeam?.league.toLowerCase().includes(query) ||
       productCategory?.name.toLowerCase().includes(query);
+    const matchesLeague =
+      !filters.league || filters.league === "all" || productTeam?.league === filters.league;
     const matchesTeam = !filters.team || filters.team === "all" || product.teamId === filters.team;
     const matchesCategory =
       !filters.category ||
@@ -64,7 +68,7 @@ export function getFilteredProducts(filters: ProductFilters) {
     const matchesPrice = !filters.maxPrice || typePrice <= filters.maxPrice;
     const matchesNovelty = !filters.novelty || filters.novelty === "all" || product.isNew;
 
-    return matchesQuery && matchesTeam && matchesCategory && matchesSize && matchesPrice && matchesNovelty;
+    return matchesQuery && matchesLeague && matchesTeam && matchesCategory && matchesSize && matchesPrice && matchesNovelty;
   });
 }
 

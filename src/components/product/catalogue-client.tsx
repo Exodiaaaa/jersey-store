@@ -12,6 +12,7 @@ import { ProductGrid } from "@/components/product/product-grid";
 
 const defaultFilters: ProductFilters = {
   query: "",
+  league: "all",
   team: "all",
   category: "all",
   size: "all",
@@ -44,10 +45,30 @@ export function CatalogueClient() {
     return new Map(adminCategories.map((category) => [category.id, category]));
   }, [adminCategories]);
 
+  const leagueOptions = useMemo(() => {
+    const leagues = new Set<string>();
+
+    adminProducts.forEach((product) => {
+      const league = teamById.get(product.teamId)?.league;
+      if (league) {
+        leagues.add(league);
+      }
+    });
+
+    return Array.from(leagues).sort((a, b) => a.localeCompare(b));
+  }, [adminProducts, teamById]);
+
   const teamOptions = useMemo(() => {
     const activeTeamIds = new Set(adminProducts.map((product) => product.teamId));
-    return adminTeams.filter((team) => activeTeamIds.has(team.id));
-  }, [adminProducts, adminTeams]);
+    const selectedLeague = filters.league ?? "all";
+
+    return adminTeams.filter((team) => {
+      const hasProduct = activeTeamIds.has(team.id);
+      const matchesLeague = selectedLeague === "all" || team.league === selectedLeague;
+
+      return hasProduct && matchesLeague;
+    });
+  }, [adminProducts, adminTeams, filters.league]);
 
   const sizeOptions = useMemo(() => {
     return sizes.filter((size) =>
@@ -61,6 +82,7 @@ export function CatalogueClient() {
       const productTeam = teamById.get(product.teamId);
       const productCategory = categoryById.get(product.categoryId);
       const query = filters.query?.trim().toLowerCase();
+      const selectedLeague = filters.league ?? "all";
       const selectedTeam = filters.team ?? "all";
       const selectedCategory = filters.category ?? "all";
       const selectedSize = filters.size ?? "all";
@@ -76,7 +98,9 @@ export function CatalogueClient() {
         !query ||
         product.name.toLowerCase().includes(query) ||
         productTeam?.name.toLowerCase().includes(query) ||
+        productTeam?.league.toLowerCase().includes(query) ||
         productCategory?.name.toLowerCase().includes(query);
+      const matchesLeague = selectedLeague === "all" || productTeam?.league === selectedLeague;
       const matchesTeam = selectedTeam === "all" || product.teamId === selectedTeam;
       const matchesCategory =
         selectedCategory === "all" ||
@@ -88,12 +112,25 @@ export function CatalogueClient() {
       const matchesPrice = !filters.maxPrice || filterPrice <= filters.maxPrice;
       const matchesNovelty = selectedNovelty === "all" || product.isNew;
 
-      return matchesQuery && matchesTeam && matchesCategory && matchesSize && matchesPrice && matchesNovelty;
+      return matchesQuery && matchesLeague && matchesTeam && matchesCategory && matchesSize && matchesPrice && matchesNovelty;
     });
   }, [adminProducts, categoryById, filters, teamById]);
 
   const updateFilter = <K extends keyof ProductFilters>(key: K, value: ProductFilters[K]) => {
     setFilters((current) => ({ ...current, [key]: value }));
+  };
+
+  const updateLeagueFilter = (league: string) => {
+    setFilters((current) => {
+      const selectedTeam = adminTeams.find((team) => team.id === current.team);
+      const shouldResetTeam = league !== "all" && selectedTeam && selectedTeam.league !== league;
+
+      return {
+        ...current,
+        league,
+        team: shouldResetTeam ? "all" : current.team,
+      };
+    });
   };
 
   return (
@@ -124,7 +161,7 @@ export function CatalogueClient() {
                 className="pl-10"
                 id="search"
                 onChange={(event) => updateFilter("query", event.target.value)}
-                placeholder="Real Madrid, Arsenal..."
+                placeholder="Real Madrid, Arsenal, LaLiga..."
                 value={filters.query ?? ""}
               />
             </div>
@@ -162,7 +199,22 @@ export function CatalogueClient() {
         </div>
 
         {showAdvanced && (
-          <div className="mt-4 grid gap-3 border-t border-white/10 pt-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-4 grid gap-3 border-t border-white/10 pt-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-2">
+              <Label htmlFor="league">Championnat</Label>
+              <Select
+                id="league"
+                onChange={(event) => updateLeagueFilter(event.target.value)}
+                value={filters.league}
+              >
+                <option value="all">Tous les championnats</option>
+                {leagueOptions.map((league) => (
+                  <option key={league} value={league}>
+                    {league}
+                  </option>
+                ))}
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="size">Taille</Label>
               <Select
