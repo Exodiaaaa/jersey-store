@@ -1,6 +1,6 @@
 import type { Category, Product, Size, Team } from "@/lib/types";
 
-export const whatsappPhoneNumber = "212604009383";
+export const whatsappPhoneNumber = "212617311976";
 
 export const sizes: Size[] = ["S", "M", "L", "XL", "XXL", "XXXL"];
 

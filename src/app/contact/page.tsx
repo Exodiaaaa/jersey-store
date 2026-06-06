@@ -19,7 +19,7 @@ export default function ContactPage() {
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {[
-          [Phone, "Téléphone", "+212 604 009 383"],
+          [Phone, "Téléphone", "+212 617-311976"],
           [MessageCircle, "WhatsApp", "Commande et suivi"],
           [MapPin, "Livraison", "Toutes villes du Maroc"],
           [Mail, "Email", "contact@kvnfootwear.ma"],
