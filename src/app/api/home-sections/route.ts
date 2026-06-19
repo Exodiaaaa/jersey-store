@@ -4,8 +4,10 @@ import { mapDbHomeSection } from "@/lib/db-mappers";
 import { HomeSectionInput } from "@/lib/types";
 
 const productInclude = {
+  category: true,
   images: true,
   stocks: true,
+  team: true,
 };
 
 const homeSectionInclude = {

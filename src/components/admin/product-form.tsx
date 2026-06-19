@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
-import { categories, sizes, teams } from "@/data/catalog";
 import { clientApi } from "@/lib/client-api";
 import { Category, Product, ProductCategoryId, ProductVisual, Size, StockBySize, Team } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
@@ -35,6 +34,11 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+function optionalPrice(value: string) {
+  const price = Number(value);
+  return price > 0 ? price : undefined;
+}
+
 function createBlankProduct(categoryItems: Category[], teamItems: Team[], sizeItems: Size[]): Product {
   return {
     id: `prod-${Date.now()}`,
@@ -59,10 +63,10 @@ function createBlankProduct(categoryItems: Category[], teamItems: Team[], sizeIt
 
 export function ProductForm({ productId }: ProductFormProps) {
   const router = useRouter();
-  const [categoryItems, setCategoryItems] = useState<Category[]>(categories);
-  const [teamItems, setTeamItems] = useState<Team[]>(teams);
-  const sizeItems = sizes;
-  const [product, setProduct] = useState<Product>(() => createBlankProduct(categories, teams, sizes));
+  const [categoryItems, setCategoryItems] = useState<Category[]>([]);
+  const [teamItems, setTeamItems] = useState<Team[]>([]);
+  const [sizeItems, setSizeItems] = useState<Size[]>([]);
+  const [product, setProduct] = useState<Product>(() => createBlankProduct([], [], []));
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [productToSave, setProductToSave] = useState<Product | null>(null);
@@ -70,14 +74,16 @@ export function ProductForm({ productId }: ProductFormProps) {
   const isEditing = Boolean(productId);
 
   useEffect(() => {
-    void Promise.all([clientApi.getCategories(), clientApi.getTeams()]).then(
-      ([nextCategories, nextTeams]) => {
+    void Promise.all([clientApi.getCategories(), clientApi.getTeams(), clientApi.getSizes()]).then(
+      ([nextCategories, nextTeams, nextSizes]) => {
         setCategoryItems(nextCategories);
         setTeamItems(nextTeams);
+        setSizeItems(nextSizes);
         if (!productId) {
           setProduct((current) => ({
             ...current,
             categoryId: nextCategories[0]?.id ?? current.categoryId,
+            sizes: nextSizes,
             teamId: nextTeams[0]?.id ?? current.teamId,
           }));
         }
@@ -133,6 +139,21 @@ export function ProductForm({ productId }: ProductFormProps) {
 
     if (product.sizes.length === 0) {
       setFormError("Choisissez au moins une taille disponible pour ce produit.");
+      return;
+    }
+
+    if (categoryItems.length === 0 || teamItems.length === 0) {
+      setFormError("Ajoutez au moins une categorie et une equipe avant de creer un produit.");
+      return;
+    }
+
+    if (product.originalBasePrice && product.originalBasePrice <= product.basePrice) {
+      setFormError("L'ancien prix maillot doit etre superieur au prix actuel.");
+      return;
+    }
+
+    if (product.originalPackPrice && product.originalPackPrice <= product.packPrice) {
+      setFormError("L'ancien prix pack doit etre superieur au prix actuel.");
       return;
     }
 
@@ -228,32 +249,64 @@ export function ProductForm({ productId }: ProductFormProps) {
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="space-y-2">
-            <Label htmlFor="basePrice">Prix maillot</Label>
-            <Input
-              id="basePrice"
-              min={0}
-              onChange={(event) => updateProduct("basePrice", Number(event.target.value))}
-              required
-              type="number"
-              value={product.basePrice}
-            />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">
+            <h2 className="text-sm font-black uppercase text-white">Maillot seul</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="basePrice">Prix promo / actuel</Label>
+                <Input
+                  id="basePrice"
+                  min={0}
+                  onChange={(event) => updateProduct("basePrice", Number(event.target.value))}
+                  required
+                  type="number"
+                  value={product.basePrice}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="originalBasePrice">Ancien prix</Label>
+                <Input
+                  id="originalBasePrice"
+                  min={0}
+                  onChange={(event) => updateProduct("originalBasePrice", optionalPrice(event.target.value))}
+                  placeholder="Ex : 299"
+                  type="number"
+                  value={product.originalBasePrice ?? ""}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="packPrice">Prix pack</Label>
-            <Input
-              id="packPrice"
-              min={0}
-              onChange={(event) => updateProduct("packPrice", Number(event.target.value))}
-              required
-              type="number"
-              value={product.packPrice}
-            />
+          <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">
+            <h2 className="text-sm font-black uppercase text-white">Pack maillot + short</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="packPrice">Prix promo / actuel</Label>
+                <Input
+                  id="packPrice"
+                  min={0}
+                  onChange={(event) => updateProduct("packPrice", Number(event.target.value))}
+                  required
+                  type="number"
+                  value={product.packPrice}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="originalPackPrice">Ancien prix</Label>
+                <Input
+                  id="originalPackPrice"
+                  min={0}
+                  onChange={(event) => updateProduct("originalPackPrice", optionalPrice(event.target.value))}
+                  placeholder="Ex : 399"
+                  type="number"
+                  value={product.originalPackPrice ?? ""}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="flockingPrice">Prix flocage</Label>
             <Input
               id="flockingPrice"

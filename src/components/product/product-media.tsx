@@ -21,18 +21,20 @@ export function ProductMedia({ name, images = [], image, className = "" }: Produ
   if (!src) {
     return (
       <div
-        aria-label={`${name} - photo à ajouter`}
+        aria-label={`${name} - photo a ajouter`}
         className={[
-          "relative isolate flex aspect-[4/5] flex-col items-center justify-center overflow-hidden rounded-lg border border-dashed border-white/15 bg-zinc-950 text-center",
+          "relative isolate flex aspect-[4/5] flex-col items-center justify-center overflow-hidden rounded-[4px] border border-dashed border-white/15 bg-[#10201f] text-center",
           className,
         ].join(" ")}
         role="img"
       >
-        <span className="grid h-12 w-12 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-amber-200">
+        <span className="grid h-12 w-12 place-items-center rounded-[4px] border border-white/10 bg-white/[0.04] text-[#d7ff45]">
           <ImagePlus size={24} />
         </span>
-        <span className="mt-3 text-sm font-bold text-white">Photo à ajouter</span>
-        <span className="mt-1 max-w-44 text-xs leading-5 text-zinc-500">Déposez les vraies photos du produit dans le back office.</span>
+        <span className="mt-3 text-sm font-bold text-white">Photo a ajouter</span>
+        <span className="mt-1 max-w-44 text-xs leading-5 text-white/48">
+          Deposez les vraies photos du produit dans le back office.
+        </span>
       </div>
     );
   }
@@ -41,7 +43,7 @@ export function ProductMedia({ name, images = [], image, className = "" }: Produ
     <div
       aria-label={name}
       className={[
-        "relative isolate aspect-[4/5] overflow-hidden rounded-lg border border-white/10 bg-zinc-950 bg-cover bg-center",
+        "relative isolate aspect-[4/5] overflow-hidden rounded-[4px] border border-white/10 bg-[#10201f] bg-cover bg-center",
         className,
       ].join(" ")}
       role="img"

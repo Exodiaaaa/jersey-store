@@ -14,7 +14,7 @@ export function Label({
 
 export function inputClassName(className = "") {
   return [
-    "h-11 w-full rounded-lg border border-cyan-100/15 bg-[#071214]/75 px-3 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-amber-300/60",
+    "h-11 w-full rounded-lg border border-white/15 bg-[#10201f]/75 px-3 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-[#d7ff45]/70",
     className,
   ].join(" ");
 }
@@ -32,7 +32,7 @@ export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
     <textarea
       {...props}
       className={[
-        "min-h-28 w-full rounded-lg border border-cyan-100/15 bg-[#071214]/75 px-3 py-3 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-amber-300/60",
+        "min-h-28 w-full rounded-lg border border-white/15 bg-[#10201f]/75 px-3 py-3 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-[#d7ff45]/70",
         props.className ?? "",
       ].join(" ")}
     />

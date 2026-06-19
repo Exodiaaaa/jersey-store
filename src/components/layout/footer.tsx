@@ -14,17 +14,17 @@ export function Footer() {
   }
 
   return (
-    <footer className="border-t border-cyan-100/10 bg-[#071214]">
+    <footer className="border-t border-white/10 bg-[#101d1c]">
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.2fr_0.8fr_0.8fr] lg:px-8">
         <div className="space-y-4">
           <Logo />
-          <p className="max-w-md text-sm leading-6 text-zinc-400">
+          <p className="max-w-md text-sm leading-6 text-white/58">
             Tenues de football soigneusement selectionnees, avec packs complets et personnalisation sur demande.
           </p>
         </div>
         <div>
           <h2 className="text-sm font-bold text-white">Boutique</h2>
-          <div className="mt-4 grid gap-2 text-sm text-zinc-400">
+          <div className="mt-4 grid gap-2 text-sm text-white/58">
             <Link className="hover:text-white" href="/catalogue">
               Catalogue
             </Link>
@@ -38,7 +38,7 @@ export function Footer() {
         </div>
         <div>
           <h2 className="text-sm font-bold text-white">Contact</h2>
-          <div className="mt-4 grid gap-3 text-sm text-zinc-400">
+          <div className="mt-4 grid gap-3 text-sm text-white/58">
             <a className="inline-flex items-center gap-2 hover:text-white" href={`https://wa.me/${whatsappPhoneNumber}`}>
               <MessageCircle size={17} />
               WhatsApp

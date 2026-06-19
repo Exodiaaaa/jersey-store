@@ -2,7 +2,6 @@
 
 import { Plus, Save, Trash2 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-import { categories } from "@/data/catalog";
 import { clientApi } from "@/lib/client-api";
 import { Category } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
@@ -21,7 +20,7 @@ function slugify(value: string) {
 }
 
 export function CategoriesManager() {
-  const [items, setItems] = useState<Category[]>(categories);
+  const [items, setItems] = useState<Category[]>([]);
   const [draft, setDraft] = useState({ name: "", description: "" });
   const [pendingAction, setPendingAction] = useState<
     | { category: Category; type: "add" }

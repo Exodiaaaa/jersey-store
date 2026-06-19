@@ -12,7 +12,7 @@ import {
   ShoppingBasket,
   Users,
 } from "lucide-react";
-import { PropsWithChildren, useEffect, useMemo } from "react";
+import { PropsWithChildren, useEffect, useMemo, useSyncExternalStore } from "react";
 import { adminSessionKey, logoutAdmin } from "@/lib/admin-auth";
 import { readStorage } from "@/lib/storage";
 import { buttonClassName } from "@/components/ui/button";
@@ -27,23 +27,48 @@ const adminNav = [
   { href: "/admin/equipes", label: "Equipes", icon: Users },
 ];
 
+const pendingSessionSnapshot = "__admin-session-pending__";
+
+function subscribeToAdminSession(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  return () => window.removeEventListener("storage", onStoreChange);
+}
+
+function getAdminSessionSnapshot() {
+  return window.localStorage.getItem(adminSessionKey) ?? "";
+}
+
+function getAdminSessionServerSnapshot() {
+  return pendingSessionSnapshot;
+}
+
 export function AdminShell({ children }: PropsWithChildren) {
   const router = useRouter();
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
-  const session = useMemo(
-    () =>
-      isLoginPage
-        ? { email: "login" }
-        : readStorage<{ email: string } | null>(adminSessionKey, null),
-    [isLoginPage],
+  const sessionSnapshot = useSyncExternalStore(
+    subscribeToAdminSession,
+    getAdminSessionSnapshot,
+    getAdminSessionServerSnapshot,
   );
+  const sessionChecked = sessionSnapshot !== pendingSessionSnapshot;
+  const session = useMemo(() => {
+    if (!sessionChecked || !sessionSnapshot) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(sessionSnapshot) as { email: string };
+    } catch {
+      return readStorage<{ email: string } | null>(adminSessionKey, null);
+    }
+  }, [sessionChecked, sessionSnapshot]);
 
   useEffect(() => {
-    if (!isLoginPage && !session) {
+    if (!isLoginPage && sessionChecked && !session) {
       router.replace("/admin/login");
     }
-  }, [isLoginPage, router, session]);
+  }, [isLoginPage, router, session, sessionChecked]);
 
   if (isLoginPage) {
     return <>{children}</>;
@@ -54,7 +79,7 @@ export function AdminShell({ children }: PropsWithChildren) {
     router.replace("/admin/login");
   };
 
-  if (!session) {
+  if (!sessionChecked || !session) {
     return (
       <div className="grid min-h-screen place-items-center bg-zinc-950 px-4 text-center text-sm text-zinc-400">
         Verification de la session admin...

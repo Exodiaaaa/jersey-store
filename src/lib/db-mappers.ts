@@ -5,9 +5,13 @@ type DbProduct = {
   slug: string;
   name: string;
   teamId: string;
+  team?: { league: string; name: string } | null;
   categoryId: string;
+  category?: { name: string } | null;
   basePrice: number;
   packPrice: number;
+  originalBasePrice: number | null;
+  originalPackPrice: number | null;
   flockingPrice: number;
   description: string;
   visualPrimary: string;
@@ -106,9 +110,14 @@ export function mapDbProduct(product: DbProduct): Product {
     slug: product.slug,
     name: product.name,
     teamId: product.teamId,
+    teamName: product.team?.name,
+    teamLeague: product.team?.league,
     categoryId: product.categoryId,
+    categoryName: product.category?.name,
     basePrice: product.basePrice,
     packPrice: product.packPrice,
+    originalBasePrice: product.originalBasePrice ?? undefined,
+    originalPackPrice: product.originalPackPrice ?? undefined,
     flockingPrice: product.flockingPrice,
     description: product.description,
     sizes,

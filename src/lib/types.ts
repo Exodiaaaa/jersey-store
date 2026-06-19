@@ -42,9 +42,14 @@ export type Product = {
   slug: string;
   name: string;
   teamId: string;
+  teamName?: string;
+  teamLeague?: string;
   categoryId: ProductCategoryId;
+  categoryName?: string;
   basePrice: number;
   packPrice: number;
+  originalBasePrice?: number;
+  originalPackPrice?: number;
   flockingPrice: number;
   description: string;
   sizes: Size[];

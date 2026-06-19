@@ -9,7 +9,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { getTeamName, getUnitPrice } from "@/lib/catalog";
+import { getProductTeamName, getUnitPrice } from "@/lib/catalog";
 import { readStorage, writeStorage } from "@/lib/storage";
 import { CartItem, Flocking, Product, ProductType, Size } from "@/lib/types";
 
@@ -75,7 +75,7 @@ export function CartProvider({ children }: PropsWithChildren) {
           id,
           productId: input.product.id,
           productName: input.product.name,
-          teamName: getTeamName(input.product.teamId),
+          teamName: getProductTeamName(input.product),
           size: input.size,
           type: input.type,
           quantity: input.quantity,

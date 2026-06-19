@@ -6,8 +6,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   const { slug } = await params;
   const product = await prisma.product.findUnique({
     include: {
+      category: true,
       images: true,
       stocks: true,
+      team: true,
     },
     where: { slug },
   });

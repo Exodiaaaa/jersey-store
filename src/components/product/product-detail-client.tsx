@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
-import { getAvailableProductTypes, getTeamName, getUnitPrice } from "@/lib/catalog";
+import { getAvailableProductTypes, getProductPriceInfo, getProductTeamName, getUnitPrice } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
 import { FlockingMode, Product, ProductType, Size } from "@/lib/types";
@@ -54,7 +54,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   return (
     <div>
       <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="lg:sticky lg:top-28 lg:self-start">
+        <div className="kvn-reveal lg:sticky lg:top-28 lg:self-start">
           <ProductMedia image={selectedImage} images={product.images} name={product.name} visual={product.visual} />
           {product.images.length > 1 && (
             <div className="mt-3 grid grid-cols-5 gap-2">
@@ -63,7 +63,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                   aria-label={`Voir photo ${index + 1}`}
                   className={[
                     "aspect-square rounded-lg border bg-cover bg-center transition",
-                    image === selectedImage ? "border-amber-300" : "border-white/10 hover:border-white/30",
+                    image === selectedImage ? "border-[#d7ff45]" : "border-white/10 hover:border-white/30",
                   ].join(" ")}
                   key={`${image}-${index}`}
                   onClick={() => setSelectedImage(image)}
@@ -74,10 +74,10 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             </div>
           )}
         </div>
-        <form className="space-y-7" onSubmit={handleSubmit}>
+        <form className="kvn-reveal kvn-reveal-delay-1 space-y-7" onSubmit={handleSubmit}>
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
-            <Badge tone="lime">{getTeamName(product.teamId)}</Badge>
+            <Badge tone="lime">{getProductTeamName(product)}</Badge>
             {product.isNew && <Badge tone="blue">Nouveau</Badge>}
             {product.isPopular && <Badge tone="silver">Populaire</Badge>}
           </div>
@@ -96,8 +96,8 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     className={[
                       "h-11 rounded-lg border text-sm font-bold transition",
                       item === size
-                        ? "border-amber-300 bg-amber-300 text-zinc-950"
-                        : "border-white/10 bg-zinc-950 text-zinc-200 hover:border-white/25",
+                        ? "border-[#d7ff45] bg-[#d7ff45] text-[#10201f]"
+                        : "border-white/10 bg-[#10201f] text-zinc-200 hover:border-white/25",
                       disabled ? "cursor-not-allowed opacity-40" : "",
                     ].join(" ")}
                     disabled={disabled}
@@ -116,26 +116,33 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           <div className="space-y-3">
             <Label>Type d’article</Label>
             <div className="grid gap-2 sm:grid-cols-2">
-              {availableTypes.map((item) => (
-                <button
-                  className={[
-                    "rounded-lg border p-3 text-left transition",
-                    item === type
-                      ? "border-amber-300 bg-amber-300 text-zinc-950"
-                      : "border-white/10 bg-zinc-950 text-zinc-200 hover:border-white/25",
-                  ].join(" ")}
-                  key={item}
-                  onClick={() => setType(item)}
-                  type="button"
-                >
-                  <span className="block text-sm font-bold">
-                    {item === "pack" ? "Maillot + short" : "Maillot seul"}
-                  </span>
-                  <span className="text-xs opacity-75">
-                    {formatPrice(item === "pack" ? product.packPrice : product.basePrice)}
-                  </span>
-                </button>
-              ))}
+              {availableTypes.map((item) => {
+                const priceInfo = getProductPriceInfo(product, item);
+
+                return (
+                  <button
+                    className={[
+                      "rounded-lg border p-3 text-left transition",
+                      item === type
+                        ? "border-[#d7ff45] bg-[#d7ff45] text-[#10201f]"
+                        : "border-white/10 bg-[#10201f] text-zinc-200 hover:border-white/25",
+                    ].join(" ")}
+                    key={item}
+                    onClick={() => setType(item)}
+                    type="button"
+                  >
+                    <span className="block text-sm font-bold">
+                      {item === "pack" ? "Maillot + short" : "Maillot seul"}
+                    </span>
+                    {priceInfo.originalPrice && (
+                      <span className="mt-1 block text-xs font-semibold opacity-60 line-through">
+                        {formatPrice(priceInfo.originalPrice)}
+                      </span>
+                    )}
+                    <span className="block text-sm font-black">{formatPrice(priceInfo.currentPrice)}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -151,8 +158,8 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     className={[
                       "h-11 rounded-lg border px-3 text-sm font-bold transition",
                       flockingMode === value
-                        ? "border-amber-300 bg-amber-300 text-zinc-950"
-                        : "border-white/10 bg-zinc-950 text-zinc-200 hover:border-white/25",
+                        ? "border-[#d7ff45] bg-[#d7ff45] text-[#10201f]"
+                        : "border-white/10 bg-[#10201f] text-zinc-200 hover:border-white/25",
                     ].join(" ")}
                     key={value}
                     onClick={() => setFlockingMode(value as FlockingMode)}
@@ -195,7 +202,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                       value={flockingNote}
                     />
                   </div>
-                  <p className="rounded-lg border border-amber-300/25 bg-amber-300/10 p-3 text-sm font-semibold text-amber-100 sm:col-span-2">
+                  <p className="rounded-lg border border-[#d7ff45]/25 bg-[#d7ff45]/10 p-3 text-sm font-semibold text-[#ecff9c] sm:col-span-2">
                     Une avance est demandee avant preparation pour toute commande avec flocage.
                   </p>
                 </div>
@@ -204,7 +211,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           )}
 
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-4">
-            <div className="inline-flex h-11 items-center rounded-lg border border-white/10 bg-zinc-950">
+            <div className="inline-flex h-11 items-center rounded-lg border border-white/10 bg-[#10201f]">
               <button
                 className="grid h-11 w-11 place-items-center text-zinc-300 disabled:opacity-40"
                 disabled={quantity <= 1}

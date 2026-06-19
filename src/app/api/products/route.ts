@@ -4,8 +4,10 @@ import { mapDbProduct } from "@/lib/db-mappers";
 import { Product } from "@/lib/types";
 
 const productInclude = {
+  category: true,
   images: true,
   stocks: true,
+  team: true,
 };
 
 function productPayload(product: Product) {
@@ -17,6 +19,8 @@ function productPayload(product: Product) {
     categoryId: product.categoryId,
     basePrice: product.basePrice,
     packPrice: product.packPrice,
+    originalBasePrice: product.originalBasePrice ?? null,
+    originalPackPrice: product.originalPackPrice ?? null,
     flockingPrice: product.flockingPrice,
     description: product.description,
     visualPrimary: product.visual.primary,

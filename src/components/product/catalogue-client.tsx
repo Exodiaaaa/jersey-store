@@ -2,9 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { RotateCcw, Search, SlidersHorizontal } from "lucide-react";
-import { categories, products, sizes, teams } from "@/data/catalog";
 import { clientApi } from "@/lib/client-api";
-import { getAvailableProductTypes, ProductFilters } from "@/lib/catalog";
+import { getAvailableProductTypes, getProductCurrentPrice, ProductFilters } from "@/lib/catalog";
 import { Category, Product, ProductCategoryId, Size, Team } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/field";
@@ -23,18 +22,33 @@ const defaultFilters: ProductFilters = {
 export function CatalogueClient() {
   const [filters, setFilters] = useState<ProductFilters>(defaultFilters);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [adminProducts, setAdminProducts] = useState<Product[]>(products);
-  const [adminCategories, setAdminCategories] = useState<Category[]>(categories);
-  const [adminTeams, setAdminTeams] = useState<Team[]>(teams);
+  const [adminProducts, setAdminProducts] = useState<Product[]>([]);
+  const [adminCategories, setAdminCategories] = useState<Category[]>([]);
+  const [adminTeams, setAdminTeams] = useState<Team[]>([]);
+  const [adminSizes, setAdminSizes] = useState<Size[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    void Promise.all([clientApi.getProducts(), clientApi.getCategories(), clientApi.getTeams()])
-      .then(([nextProducts, nextCategories, nextTeams]) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const requestedFilters: ProductFilters = {
+      ...defaultFilters,
+      category: (searchParams.get("category") as ProductCategoryId | "all" | null) ?? defaultFilters.category,
+      league: searchParams.get("league") ?? defaultFilters.league,
+      novelty: searchParams.get("novelty") === "new" ? "new" : defaultFilters.novelty,
+      query: searchParams.get("query") ?? defaultFilters.query,
+      team: searchParams.get("team") ?? defaultFilters.team,
+    };
+
+    void Promise.all([clientApi.getProducts(), clientApi.getCategories(), clientApi.getTeams(), clientApi.getSizes()])
+      .then(([nextProducts, nextCategories, nextTeams, nextSizes]) => {
         setAdminProducts(nextProducts);
         setAdminCategories(nextCategories);
         setAdminTeams(nextTeams);
+        setAdminSizes(nextSizes);
+        setFilters(requestedFilters);
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => setIsLoading(false));
   }, []);
 
   const teamById = useMemo(() => {
@@ -49,7 +63,7 @@ export function CatalogueClient() {
     const leagues = new Set<string>();
 
     adminProducts.forEach((product) => {
-      const league = teamById.get(product.teamId)?.league;
+      const league = teamById.get(product.teamId)?.league ?? product.teamLeague;
       if (league) {
         leagues.add(league);
       }
@@ -71,16 +85,19 @@ export function CatalogueClient() {
   }, [adminProducts, adminTeams, filters.league]);
 
   const sizeOptions = useMemo(() => {
-    return sizes.filter((size) =>
+    return adminSizes.filter((size) =>
       adminProducts.some((product) => product.sizes.includes(size) && product.stock[size] > 0),
     );
-  }, [adminProducts]);
+  }, [adminProducts, adminSizes]);
 
   const filteredProducts = useMemo(() => {
     return adminProducts.filter((product) => {
       const availableTypes = getAvailableProductTypes(product);
       const productTeam = teamById.get(product.teamId);
       const productCategory = categoryById.get(product.categoryId);
+      const productTeamName = productTeam?.name ?? product.teamName ?? product.teamId;
+      const productTeamLeague = productTeam?.league ?? product.teamLeague ?? "";
+      const productCategoryName = productCategory?.name ?? product.categoryName ?? product.categoryId;
       const query = filters.query?.trim().toLowerCase();
       const selectedLeague = filters.league ?? "all";
       const selectedTeam = filters.team ?? "all";
@@ -89,18 +106,18 @@ export function CatalogueClient() {
       const selectedNovelty = filters.novelty ?? "all";
       const filterPrice =
         selectedCategory === "pack"
-          ? product.packPrice
+          ? getProductCurrentPrice(product, "pack")
           : selectedCategory === "jersey"
-            ? product.basePrice
-            : Math.min(product.basePrice, product.packPrice);
+            ? getProductCurrentPrice(product, "jersey")
+            : Math.min(getProductCurrentPrice(product, "jersey"), getProductCurrentPrice(product, "pack"));
 
       const matchesQuery =
         !query ||
         product.name.toLowerCase().includes(query) ||
-        productTeam?.name.toLowerCase().includes(query) ||
-        productTeam?.league.toLowerCase().includes(query) ||
-        productCategory?.name.toLowerCase().includes(query);
-      const matchesLeague = selectedLeague === "all" || productTeam?.league === selectedLeague;
+        productTeamName.toLowerCase().includes(query) ||
+        productTeamLeague.toLowerCase().includes(query) ||
+        productCategoryName.toLowerCase().includes(query);
+      const matchesLeague = selectedLeague === "all" || productTeamLeague === selectedLeague;
       const matchesTeam = selectedTeam === "all" || product.teamId === selectedTeam;
       const matchesCategory =
         selectedCategory === "all" ||
@@ -134,17 +151,19 @@ export function CatalogueClient() {
   };
 
   return (
-    <div className="grid gap-6">
-      <section className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+    <div className="grid gap-7">
+      <section className="kvn-reveal rounded-[4px] border border-white/12 bg-[#172625] p-4 shadow-[0_18px_55px_rgba(0,0,0,0.16)] sm:p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase text-amber-200">Catalogue</p>
-            <h1 className="mt-1 text-2xl font-black text-white sm:text-3xl">Trouver une tenue</h1>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d7ff45]">Store</p>
+            <h1 className="mt-2 text-4xl font-black uppercase leading-none text-white sm:text-5xl">
+              Find your kit.
+            </h1>
           </div>
           <div className="flex gap-2">
             <Button onClick={() => setShowAdvanced((value) => !value)} type="button" variant="secondary">
               <SlidersHorizontal size={17} />
-              Plus de filtres
+              Filtres
             </Button>
             <Button onClick={() => setFilters(defaultFilters)} type="button" variant="ghost">
               <RotateCcw size={16} />
@@ -161,7 +180,7 @@ export function CatalogueClient() {
                 className="pl-10"
                 id="search"
                 onChange={(event) => updateFilter("query", event.target.value)}
-                placeholder="Real Madrid, Arsenal, LaLiga..."
+                placeholder="Real Madrid, Arsenal, World Cup..."
                 value={filters.query ?? ""}
               />
             </div>
@@ -199,7 +218,7 @@ export function CatalogueClient() {
         </div>
 
         {showAdvanced && (
-          <div className="mt-4 grid gap-3 border-t border-white/10 pt-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-3 border-t border-white/12 pt-4 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-2">
               <Label htmlFor="league">Championnat</Label>
               <Select
@@ -233,7 +252,7 @@ export function CatalogueClient() {
             <div className="space-y-3">
               <Label htmlFor="price">Prix max : {filters.maxPrice} MAD</Label>
               <input
-                className="h-2 w-full accent-amber-300"
+                className="h-2 w-full accent-[#d7ff45]"
                 id="price"
                 max="450"
                 min="100"
@@ -257,9 +276,11 @@ export function CatalogueClient() {
         )}
       </section>
 
-      <section>
+      <section className="kvn-reveal kvn-reveal-delay-1">
         <div className="mb-4 flex items-end justify-between gap-4">
-          <p className="text-sm text-zinc-400">{filteredProducts.length} produit(s)</p>
+          <p className="text-sm font-bold uppercase tracking-[0.12em] text-white/56">
+            {isLoading ? "Chargement des produits..." : `${filteredProducts.length} produit(s)`}
+          </p>
         </div>
         <ProductGrid products={filteredProducts} />
       </section>

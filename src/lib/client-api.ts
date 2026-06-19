@@ -12,6 +12,7 @@ import {
   Product,
   ProductReview,
   ProductReviewInput,
+  Size,
   Team,
 } from "@/lib/types";
 
@@ -25,7 +26,8 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`API error ${response.status} on ${url}`);
+    const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(errorBody?.message ?? `API error ${response.status} on ${url}`);
   }
 
   return response.json() as Promise<T>;
@@ -127,6 +129,9 @@ export const clientApi = {
   },
   getDashboardStats() {
     return request<DashboardStats>("/api/dashboard");
+  },
+  getSizes() {
+    return request<Size[]>("/api/sizes");
   },
   getHomeSections() {
     return request<HomeSection[]>("/api/home-sections");

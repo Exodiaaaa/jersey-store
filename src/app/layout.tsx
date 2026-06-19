@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { SiteEffects } from "@/components/layout/site-effects";
 import { CartProvider } from "@/lib/cart-context";
 import "./globals.css";
 
@@ -28,8 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full bg-[#071214] text-zinc-50">
+      <body className="min-h-full bg-[#314948] text-zinc-50">
         <CartProvider>
+          <SiteEffects />
           <Header />
           <main className="min-h-screen">{children}</main>
           <Footer />

@@ -14,6 +14,7 @@ export function CheckoutForm() {
   const { items, total, clearCart } = useCart();
   const hasFlockingAdvance = items.some((item) => item.flocking.mode !== "none");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [customer, setCustomer] = useState({
     fullName: "",
     phone: "",
@@ -26,10 +27,13 @@ export function CheckoutForm() {
     if (items.length === 0 || isSubmitting) return;
 
     setIsSubmitting(true);
+    setSubmitError("");
     try {
       const order = await clientApi.createOrder(items, customer);
       clearCart();
       router.push(`/confirmation?id=${order.id}`);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Impossible de valider la commande.");
     } finally {
       setIsSubmitting(false);
     }
@@ -105,6 +109,11 @@ export function CheckoutForm() {
           <Send size={19} />
           {isSubmitting ? "Enregistrement..." : "Commander sur WhatsApp"}
         </Button>
+        {submitError && (
+          <p className="mt-4 rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm font-semibold text-red-100">
+            {submitError}
+          </p>
+        )}
       </form>
       <aside className="h-fit rounded-lg border border-white/10 bg-white/[0.04] p-5 lg:sticky lg:top-24">
         <h2 className="inline-flex items-center gap-2 text-xl font-black text-white">

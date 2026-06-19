@@ -1,9 +1,4 @@
-import { products } from "@/data/catalog";
 import { ProductDetailBySlug } from "@/components/product/product-detail-by-slug";
-
-export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.slug }));
-}
 
 export default async function ProductPage({ params }: PageProps<"/produit/[slug]">) {
   const { slug } = await params;

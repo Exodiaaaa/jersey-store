@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { getCategoryName, getTeamName } from "@/lib/catalog";
-import { formatPrice } from "@/lib/format";
+import { getProductCategoryName, getProductPriceInfo, getProductTeamName } from "@/lib/catalog";
 import { Product } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { ProductMedia } from "@/components/product/product-media";
+import { PriceDisplay } from "@/components/product/price-display";
 
 type ProductCardProps = {
   product: Product;
@@ -13,41 +13,45 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, className = "" }: ProductCardProps) {
-  const startingPrice = product.categoryId === "pack" ? product.packPrice : product.basePrice;
+  const priceInfo = getProductPriceInfo(product, product.categoryId === "pack" ? "pack" : "jersey");
+  const hasPromo = Boolean(priceInfo.originalPrice);
 
   return (
     <article
       className={[
-        "group overflow-hidden rounded-lg border border-cyan-100/12 bg-[#0b1b1e]/82 shadow-[0_14px_38px_rgba(0,0,0,0.26)] transition hover:border-amber-300/35 hover:bg-[#10272b]",
+        "kvn-reveal kvn-card-lift group overflow-hidden rounded-[4px] bg-[#172625] shadow-[0_16px_42px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:bg-[#101d1c]",
         className,
       ].join(" ")}
     >
-      <Link className="block" href={`/produit/${product.slug}`}>
+      <Link className="relative block" href={`/produit/${product.slug}`}>
         <ProductMedia
-          className="rounded-none border-0"
+          className="rounded-none border-0 transition duration-500 group-hover:scale-[1.03]"
           images={product.images}
           name={product.name}
           visual={product.visual}
         />
-      </Link>
-      <div className="space-y-4 p-4">
-        <div className="flex flex-wrap gap-2">
-          <Badge tone="silver">{getCategoryName(product.categoryId)}</Badge>
+        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          {hasPromo && <Badge tone="silver">Sale</Badge>}
           {product.isNew && (
             <Badge tone="lime">
               <Sparkles size={13} />
-              Nouveau
+              New
             </Badge>
           )}
         </div>
+      </Link>
+      <div className="space-y-4 p-4">
+        <Badge tone="silver">{getProductCategoryName(product)}</Badge>
         <div>
-          <p className="text-xs font-semibold uppercase text-zinc-500">{getTeamName(product.teamId)}</p>
-          <h2 className="mt-1 line-clamp-2 min-h-12 text-base font-bold text-white">{product.name}</h2>
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-white/42">{getProductTeamName(product)}</p>
+          <h2 className="mt-1 line-clamp-2 min-h-12 text-base font-black uppercase leading-tight text-white">
+            {product.name}
+          </h2>
         </div>
         <div className="flex items-end justify-between gap-3">
           <div>
-            <p className="text-xs text-zinc-500">À partir de</p>
-            <p className="text-xl font-black text-white">{formatPrice(startingPrice)}</p>
+            <p className="text-xs font-bold uppercase text-white/42">A partir de</p>
+            <PriceDisplay currentPrice={priceInfo.currentPrice} originalPrice={priceInfo.originalPrice} />
           </div>
           <LinkButton href={`/produit/${product.slug}`} size="sm">
             Commander

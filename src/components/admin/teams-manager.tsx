@@ -2,7 +2,6 @@
 
 import { Plus, Save, Trash2 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-import { teams } from "@/data/catalog";
 import { clientApi } from "@/lib/client-api";
 import { Team } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
@@ -21,7 +20,7 @@ function slugify(value: string) {
 }
 
 export function TeamsManager() {
-  const [items, setItems] = useState<Team[]>(teams);
+  const [items, setItems] = useState<Team[]>([]);
   const [draft, setDraft] = useState({ name: "", league: "", country: "", accent: "#f59e0b" });
   const [pendingAction, setPendingAction] = useState<
     | { team: Team; type: "add" }

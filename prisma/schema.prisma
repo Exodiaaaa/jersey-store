@@ -34,30 +34,32 @@ model SizeOption {
 }
 
 model Product {
-  id              String         @id
-  slug            String         @unique
-  name            String
-  teamId          String
-  categoryId      String
-  basePrice       Int
-  packPrice       Int
-  flockingPrice   Int
-  description     String         @db.Text
-  visualPrimary   String
-  visualSecondary String
-  visualTrim      String
-  visualPattern   String
-  isNew           Boolean        @default(false)
-  isPopular       Boolean        @default(false)
-  allowFlocking   Boolean        @default(true)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  category        Category       @relation(fields: [categoryId], references: [id])
-  team            Team           @relation(fields: [teamId], references: [id])
-  homeSections    HomeSectionProduct[]
-  images          ProductImage[]
-  reviews         ProductReview[]
-  stocks          ProductStock[]
+  id                String               @id
+  slug              String               @unique
+  name              String
+  teamId            String
+  categoryId        String
+  basePrice         Int
+  packPrice         Int
+  originalBasePrice Int?
+  originalPackPrice Int?
+  flockingPrice     Int
+  description       String               @db.Text
+  visualPrimary     String
+  visualSecondary   String
+  visualTrim        String
+  visualPattern     String
+  isNew             Boolean              @default(false)
+  isPopular         Boolean              @default(false)
+  allowFlocking     Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  category          Category             @relation(fields: [categoryId], references: [id])
+  team              Team                 @relation(fields: [teamId], references: [id])
+  homeSections      HomeSectionProduct[]
+  images            ProductImage[]
+  reviews           ProductReview[]
+  stocks            ProductStock[]
 
   @@map("products")
 }

@@ -3,20 +3,20 @@
 import Link from "next/link";
 import { Edit3, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { categories, teams } from "@/data/catalog";
 import { clientApi } from "@/lib/client-api";
-import { formatPrice } from "@/lib/format";
+import { getProductPriceInfo } from "@/lib/catalog";
 import { Category, Product, Team } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductMedia } from "@/components/product/product-media";
+import { PriceDisplay } from "@/components/product/price-display";
 import { Badge } from "@/components/ui/badge";
 import { Button, LinkButton } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export function ProductsList() {
   const [items, setItems] = useState<Product[]>([]);
-  const [categoryItems, setCategoryItems] = useState<Category[]>(categories);
-  const [teamItems, setTeamItems] = useState<Team[]>(teams);
+  const [categoryItems, setCategoryItems] = useState<Category[]>([]);
+  const [teamItems, setTeamItems] = useState<Team[]>([]);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   useEffect(() => {
@@ -29,8 +29,10 @@ export function ProductsList() {
     ).catch(() => undefined);
   }, []);
 
-  const getCategoryLabel = (id: string) => categoryItems.find((category) => category.id === id)?.name ?? id;
-  const getTeamLabel = (id: string) => teamItems.find((team) => team.id === id)?.name ?? id;
+  const getCategoryLabel = (product: Product) =>
+    categoryItems.find((category) => category.id === product.categoryId)?.name ?? product.categoryName ?? product.categoryId;
+  const getTeamLabel = (product: Product) =>
+    teamItems.find((team) => team.id === product.teamId)?.name ?? product.teamName ?? product.teamId;
 
   const deleteProduct = async () => {
     if (!productToDelete) return;
@@ -55,6 +57,8 @@ export function ProductsList() {
       <div className="grid gap-4">
         {items.map((product) => {
           const totalStock = product.sizes.reduce((sum, size) => sum + (product.stock[size] ?? 0), 0);
+          const jerseyPriceInfo = getProductPriceInfo(product, "jersey");
+          const packPriceInfo = getProductPriceInfo(product, "pack");
 
           return (
             <article
@@ -64,14 +68,28 @@ export function ProductsList() {
               <ProductMedia className="aspect-square" images={product.images} name={product.name} visual={product.visual} />
               <div className="min-w-0">
                 <div className="flex flex-wrap gap-2">
-                  <Badge tone="silver">{getCategoryLabel(product.categoryId)}</Badge>
-                  <Badge tone="blue">{getTeamLabel(product.teamId)}</Badge>
+                  <Badge tone="silver">{getCategoryLabel(product)}</Badge>
+                  <Badge tone="blue">{getTeamLabel(product)}</Badge>
                   {product.allowFlocking && <Badge tone="lime">Flocage</Badge>}
                 </div>
                 <h2 className="mt-3 truncate text-lg font-black text-white">{product.name}</h2>
-                <div className="mt-2 grid gap-2 text-sm text-zinc-400 sm:grid-cols-3">
-                  <span>Maillot : {formatPrice(product.basePrice)}</span>
-                  <span>Pack : {formatPrice(product.packPrice)}</span>
+                <div className="mt-2 grid gap-3 text-sm text-zinc-400 sm:grid-cols-3">
+                  <div>
+                    <span className="text-xs text-zinc-500">Maillot</span>
+                    <PriceDisplay
+                      currentPrice={jerseyPriceInfo.currentPrice}
+                      originalPrice={jerseyPriceInfo.originalPrice}
+                      size="sm"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs text-zinc-500">Pack</span>
+                    <PriceDisplay
+                      currentPrice={packPriceInfo.currentPrice}
+                      originalPrice={packPriceInfo.originalPrice}
+                      size="sm"
+                    />
+                  </div>
                   <span>Stock total : {totalStock}</span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
