@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
+import { sizes as defaultSizes } from "@/data/catalog";
 import { clientApi } from "@/lib/client-api";
 import { Category, Product, ProductCategoryId, ProductVisual, Size, StockBySize, Team } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
@@ -65,8 +66,8 @@ export function ProductForm({ productId }: ProductFormProps) {
   const router = useRouter();
   const [categoryItems, setCategoryItems] = useState<Category[]>([]);
   const [teamItems, setTeamItems] = useState<Team[]>([]);
-  const [sizeItems, setSizeItems] = useState<Size[]>([]);
-  const [product, setProduct] = useState<Product>(() => createBlankProduct([], [], []));
+  const [sizeItems, setSizeItems] = useState<Size[]>(defaultSizes);
+  const [product, setProduct] = useState<Product>(() => createBlankProduct([], [], defaultSizes));
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [productToSave, setProductToSave] = useState<Product | null>(null);
@@ -78,17 +79,22 @@ export function ProductForm({ productId }: ProductFormProps) {
       ([nextCategories, nextTeams, nextSizes]) => {
         setCategoryItems(nextCategories);
         setTeamItems(nextTeams);
-        setSizeItems(nextSizes);
+        const availableSizes = nextSizes.length > 0 ? nextSizes : defaultSizes;
+        setSizeItems(availableSizes);
         if (!productId) {
           setProduct((current) => ({
             ...current,
             categoryId: nextCategories[0]?.id ?? current.categoryId,
-            sizes: nextSizes,
+            sizes: availableSizes,
             teamId: nextTeams[0]?.id ?? current.teamId,
           }));
         }
       },
-    ).catch(() => undefined);
+    ).catch(() => {
+      if (!productId) {
+        setProduct((current) => ({ ...current, sizes: defaultSizes }));
+      }
+    });
   }, [productId]);
 
   useEffect(() => {

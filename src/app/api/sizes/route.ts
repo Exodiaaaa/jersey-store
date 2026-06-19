@@ -10,7 +10,7 @@ export async function GET() {
     .filter((size): size is Size => catalogSizes.includes(size as Size))
     .sort((a, b) => catalogSizes.indexOf(a) - catalogSizes.indexOf(b));
 
-  return NextResponse.json(sortedSizes);
+  return NextResponse.json(sortedSizes.length > 0 ? sortedSizes : catalogSizes);
 }
 
 export async function PUT(request: Request) {

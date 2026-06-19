@@ -11,7 +11,7 @@ export default function ContactPage() {
           Commande rapide sur WhatsApp
         </h1>
         <p className="mt-5 max-w-xl text-base leading-7 text-white/64">
-          Pour une question de taille, de stock ou de flocage, le vendeur repond directement avant
+          Pour une question de taille, de disponibilite ou de flocage, le vendeur repond directement avant
           validation de la commande.
         </p>
         <LinkButton className="mt-7" href={`https://wa.me/${whatsappPhoneNumber}`} size="lg">

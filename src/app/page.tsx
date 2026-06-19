@@ -160,7 +160,7 @@ function ValueBand() {
     {
       icon: PackageCheck,
       label: "Packs complets",
-      text: "Maillot seul ou ensemble maillot + short selon le stock disponible.",
+      text: "Maillot seul ou ensemble maillot + short selon les disponibilites.",
     },
   ];
 

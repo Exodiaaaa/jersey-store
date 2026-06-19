@@ -18,7 +18,9 @@ type ProductDetailClientProps = {
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const availableTypes = getAvailableProductTypes(product);
-  const [size, setSize] = useState<Size>(product.sizes[0]);
+  const firstAvailableSize =
+    product.sizes.find((item) => (product.stock[item] ?? 0) > 0) ?? product.sizes[0] ?? "S";
+  const [size, setSize] = useState<Size>(firstAvailableSize);
   const [type, setType] = useState<ProductType>(availableTypes[0]);
   const [quantity, setQuantity] = useState(1);
   const [flockingMode, setFlockingMode] = useState<FlockingMode>("none");
@@ -94,23 +96,28 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                 return (
                   <button
                     className={[
-                      "h-11 rounded-lg border text-sm font-bold transition",
+                      "relative h-11 overflow-hidden rounded-lg border text-sm font-bold transition",
                       item === size
                         ? "border-[#d7ff45] bg-[#d7ff45] text-[#10201f]"
                         : "border-white/10 bg-[#10201f] text-zinc-200 hover:border-white/25",
-                      disabled ? "cursor-not-allowed opacity-40" : "",
+                      disabled ? "cursor-not-allowed opacity-50" : "",
                     ].join(" ")}
                     disabled={disabled}
                     key={item}
                     onClick={() => setSize(item)}
                     type="button"
                   >
-                    {item}
+                    <span className="relative z-10">{item}</span>
+                    {disabled && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute left-2 right-2 top-1/2 h-0.5 -rotate-12 bg-white/75"
+                      />
+                    )}
                   </button>
                 );
               })}
             </div>
-            <p className="text-xs text-zinc-500">Stock taille {size} : {maxStock}</p>
           </div>
 
           <div className="space-y-3">
