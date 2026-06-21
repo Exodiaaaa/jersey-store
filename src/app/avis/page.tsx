@@ -14,7 +14,7 @@ function RatingStars({ rating }: { rating: number }) {
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((value) => (
         <Star
-          className={value <= rating ? "fill-[#d7ff45] text-[#d7ff45]" : "text-white/24"}
+          className={value <= rating ? "fill-[#d9dde2] text-[#d9dde2]" : "text-white/24"}
           key={value}
           size={16}
         />
@@ -59,7 +59,7 @@ export default async function ReviewsPage() {
           </p>
         </div>
 
-        <div className="rounded-[4px] border border-white/12 bg-[#172625] p-5">
+        <div className="rounded-[4px] border border-white/12 bg-[#111318] p-5">
           <p className="text-sm font-semibold text-white/56">Note moyenne</p>
           <div className="mt-3 flex items-center gap-3">
             <RatingStars rating={Math.round(averageRating)} />
@@ -72,7 +72,7 @@ export default async function ReviewsPage() {
       </div>
 
       {reviews.length === 0 ? (
-        <div className="mt-8 rounded-[4px] border border-white/12 bg-[#172625] p-8 text-center">
+        <div className="mt-8 rounded-[4px] border border-white/12 bg-[#111318] p-8 text-center">
           <p className="text-lg font-bold text-white">Aucun avis pour le moment.</p>
           <p className="mt-2 text-sm text-white/58">
             Les premiers retours clients apparaitront ici apres publication sur les fiches produit.
@@ -88,7 +88,7 @@ export default async function ReviewsPage() {
 
             return (
               <article
-                className="overflow-hidden rounded-[4px] border border-white/12 bg-[#172625] transition hover:border-[#d7ff45]/35 hover:bg-[#101d1c]"
+                className="overflow-hidden rounded-[4px] border border-white/12 bg-[#111318] transition hover:border-[#d9dde2]/40 hover:bg-[#060607]"
                 key={review.id}
               >
                 <Link href={`/produit/${review.product.slug}`}>
@@ -111,10 +111,10 @@ export default async function ReviewsPage() {
                     </div>
                     <RatingStars rating={review.rating} />
                   </div>
-                  <p className="text-sm font-bold text-[#ecff9c]">{review.customerName}</p>
+                  <p className="text-sm font-bold text-[#f5f7f9]">{review.customerName}</p>
                   <p className="text-sm leading-6 text-zinc-300">{review.comment}</p>
                   <Link
-                    className="inline-flex text-sm font-semibold text-zinc-200 transition hover:text-[#d7ff45]"
+                    className="inline-flex text-sm font-semibold text-zinc-200 transition hover:text-[#d9dde2]"
                     href={`/produit/${review.product.slug}`}
                   >
                     Voir le produit
@@ -126,7 +126,7 @@ export default async function ReviewsPage() {
         </div>
       )}
 
-      <div className="mt-10 grid gap-4 rounded-[4px] border border-white/12 bg-[#101d1c] p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+      <div className="mt-10 grid gap-4 rounded-[4px] border border-white/12 bg-[#060607] p-5 sm:grid-cols-[1fr_auto] sm:items-center">
         <div>
           <h2 className="text-xl font-black text-white">Une question avant de commander ?</h2>
           <p className="mt-2 text-sm leading-6 text-zinc-400">

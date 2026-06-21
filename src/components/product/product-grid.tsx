@@ -9,7 +9,7 @@ type ProductGridProps = {
 export function ProductGrid({ products, emptyLabel = "Aucun produit trouve." }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <div className="rounded-[4px] border border-white/12 bg-[#172625] p-8 text-center text-white/62">
+      <div className="rounded-[4px] border border-white/12 bg-[#111318] p-8 text-center text-white/62">
         {emptyLabel}
       </div>
     );

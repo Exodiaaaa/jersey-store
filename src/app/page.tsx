@@ -17,7 +17,7 @@ import { ProductCard } from "@/components/product/product-card";
 import { PriceDisplay } from "@/components/product/price-display";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
-import { getProductCategoryName, getProductPriceInfo } from "@/lib/catalog";
+import { getDefaultProductType, getProductCategoryName, getProductPriceInfo } from "@/lib/catalog";
 import { clientApi } from "@/lib/client-api";
 import { Category, HomeSection, Product, Team } from "@/lib/types";
 
@@ -63,18 +63,18 @@ function HomeProductSection({ title, subtitle, products, tone = "solid" }: HomeS
   }
 
   return (
-    <section className={tone === "soft" ? "bg-[#263c3b]" : "bg-[#314948]"}>
+    <section className={tone === "soft" ? "bg-[#111318]" : "bg-[#090a0c]"}>
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="kvn-reveal mb-5 flex items-end justify-between gap-5">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d7ff45]">Top picks</p>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d9dde2]">Top picks</p>
             <h2 className="mt-2 text-4xl font-black uppercase leading-none text-white sm:text-5xl lg:text-6xl">
               {title}
             </h2>
             {subtitle && <p className="mt-3 max-w-xl text-sm leading-6 text-white/68">{subtitle}</p>}
           </div>
           <Link
-            className="hidden items-center gap-2 text-sm font-black uppercase text-white transition hover:text-[#d7ff45] sm:inline-flex"
+            className="hidden items-center gap-2 text-sm font-black uppercase text-white transition hover:text-[#d9dde2] sm:inline-flex"
             href="/catalogue"
           >
             View all
@@ -109,11 +109,11 @@ function ShopByClub({ products, teams }: { products: Product[]; teams: Team[] })
   }
 
   return (
-    <section className="bg-[#314948]">
+    <section className="bg-[#090a0c]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="kvn-reveal mb-5 flex items-end justify-between gap-5">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d7ff45]">Shop by club</p>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d9dde2]">Shop by club</p>
             <h2 className="mt-2 text-4xl font-black uppercase leading-none text-white sm:text-5xl">
               Pick your colors.
             </h2>
@@ -124,7 +124,7 @@ function ShopByClub({ products, teams }: { products: Product[]; teams: Team[] })
         <div className="kvn-reveal kvn-reveal-delay-1 kvn-rail-scroll -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 xl:grid-cols-6">
           {clubCards.map((team) => (
             <Link
-              className="kvn-card-lift group min-h-52 w-[72vw] max-w-[300px] shrink-0 snap-start overflow-hidden rounded-[4px] border border-white/12 bg-[#172625] p-5 transition hover:-translate-y-1 hover:border-[#d7ff45]/60 hover:bg-[#101d1c] lg:w-auto"
+              className="kvn-card-lift group min-h-52 w-[72vw] max-w-[300px] shrink-0 snap-start overflow-hidden rounded-[4px] border border-white/12 bg-[#111318] p-5 transition hover:-translate-y-1 hover:border-[#d9dde2]/60 hover:bg-[#060607] lg:w-auto"
               href={`/catalogue?team=${team.id}`}
               key={team.id}
             >
@@ -135,7 +135,7 @@ function ShopByClub({ products, teams }: { products: Product[]; teams: Team[] })
               <h3 className="mt-2 text-xl font-black text-white">{team.name}</h3>
               <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-4">
                 <span className="text-sm font-bold text-white/72">{team.count}+ produits</span>
-                <ChevronRight className="text-[#d7ff45] transition group-hover:translate-x-1" size={20} />
+                <ChevronRight className="text-[#d9dde2] transition group-hover:translate-x-1" size={20} />
               </div>
             </Link>
           ))}
@@ -165,10 +165,10 @@ function ValueBand() {
   ];
 
   return (
-    <section className="bg-[#1b2c2b]">
+    <section className="bg-[#14161b]">
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div className="kvn-reveal">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d7ff45]">What we stand for</p>
+          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d9dde2]">What we stand for</p>
           <h2 className="mt-3 max-w-xl text-4xl font-black uppercase leading-none text-white sm:text-5xl">
             We outfit the people who live for this game.
           </h2>
@@ -182,7 +182,7 @@ function ValueBand() {
                 className="kvn-reveal grid gap-4 border-t border-white/12 py-5 sm:grid-cols-[90px_1fr]"
                 key={item.label}
               >
-                <div className="flex items-center gap-3 text-[#d7ff45]">
+                <div className="flex items-center gap-3 text-[#d9dde2]">
                   <span className="text-sm font-black">{String(index + 1).padStart(2, "0")}</span>
                   <Icon size={22} />
                 </div>
@@ -221,17 +221,17 @@ function CategoryTiles({ categories, products }: { categories: Category[]; produ
   }
 
   return (
-    <section className="bg-[#314948]">
+    <section className="bg-[#090a0c]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="kvn-reveal mb-5 flex items-end justify-between gap-5">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d7ff45]">Shop by category</p>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d9dde2]">Shop by category</p>
             <h2 className="mt-2 text-4xl font-black uppercase leading-none text-white sm:text-5xl">
               Find your gear.
             </h2>
           </div>
           <Link
-            className="hidden items-center gap-2 text-sm font-black uppercase text-white transition hover:text-[#d7ff45] sm:inline-flex"
+            className="hidden items-center gap-2 text-sm font-black uppercase text-white transition hover:text-[#d9dde2] sm:inline-flex"
             href="/catalogue"
           >
             View all
@@ -241,11 +241,11 @@ function CategoryTiles({ categories, products }: { categories: Category[]; produ
         <div className="kvn-reveal kvn-reveal-delay-1 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {tiles.map((category, index) => (
             <Link
-              className="kvn-card-lift group min-h-44 overflow-hidden rounded-[4px] border border-white/12 bg-[#172625] p-5 transition hover:border-[#d7ff45]/60 hover:bg-[#101d1c]"
+              className="kvn-card-lift group min-h-44 overflow-hidden rounded-[4px] border border-white/12 bg-[#111318] p-5 transition hover:border-[#d9dde2]/60 hover:bg-[#060607]"
               href={category.href}
               key={`${category.title}-${index}`}
             >
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#d7ff45]">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#d9dde2]">
                 {category.count} produits
               </p>
               <h3 className="mt-6 text-3xl font-black uppercase leading-none text-white">{category.title}</h3>
@@ -332,7 +332,7 @@ export default function Home() {
   const safeHeroIndex = heroProducts.length > 0 ? heroIndex % heroProducts.length : 0;
   const heroProduct = heroProducts[safeHeroIndex] ?? featuredProducts[0] ?? storeProducts[0];
   const heroPriceInfo = heroProduct
-    ? getProductPriceInfo(heroProduct, heroProduct.categoryId === "pack" ? "pack" : "jersey")
+    ? getProductPriceInfo(heroProduct, getDefaultProductType(heroProduct))
     : undefined;
   const heroImage = heroProduct?.images[0];
   const productCountLabel = storeProducts.length > 0 ? `${storeProducts.length}+` : "0";
@@ -365,18 +365,18 @@ export default function Home() {
   }, [heroProducts.length]);
 
   return (
-    <div className="bg-[#314948] text-white">
-      <section className="relative isolate min-h-[calc(100vh-5rem)] overflow-hidden bg-[#172625]">
+    <div className="bg-[#090a0c] text-white">
+      <section className="relative isolate min-h-[calc(100vh-5rem)] overflow-hidden bg-[#111318]">
         {heroImage && (
           <div
             aria-hidden="true"
             className="kvn-parallax absolute inset-0 bg-cover bg-center transition-all duration-1000"
             style={{
-              backgroundImage: `linear-gradient(90deg, rgba(18,31,30,0.92), rgba(18,31,30,0.58) 45%, rgba(18,31,30,0.22)), linear-gradient(180deg, rgba(18,31,30,0.22), rgba(18,31,30,0.96)), url("${heroImage.replace(/"/g, "%22")}")`,
+              backgroundImage: `linear-gradient(90deg, rgba(6,6,7,0.94), rgba(6,6,7,0.62) 45%, rgba(6,6,7,0.24)), linear-gradient(180deg, rgba(6,6,7,0.22), rgba(6,6,7,0.96)), url("${heroImage.replace(/"/g, "%22")}")`,
             }}
           />
         )}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_25%,rgba(215,255,69,0.16),transparent_28%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_25%,rgba(217,221,226,0.16),transparent_28%)]" />
         <div className="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl content-center px-4 py-14 sm:px-6 lg:px-8">
           <div className="kvn-reveal max-w-3xl">
             <Badge tone="lime" className="uppercase tracking-[0.18em]">
@@ -385,7 +385,7 @@ export default function Home() {
             </Badge>
             <h1 className="mt-5 text-6xl font-black uppercase leading-[0.86] text-white sm:text-7xl lg:text-8xl">
               KVN Footwear
-              <span className="block text-[#d7ff45]">Store</span>
+              <span className="block text-[#d9dde2]">Store</span>
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
               Maillots premium, ensembles complets et flocage personnalise pour les supporters qui
@@ -409,7 +409,7 @@ export default function Home() {
               [teamCountLabel, "Clubs"],
               ["24 h", "Reponse"],
             ].map(([value, label]) => (
-              <div className="bg-[#10201f]/82 p-4 backdrop-blur" key={label}>
+              <div className="bg-[#060607]/82 p-4 backdrop-blur" key={label}>
                 <p className="text-3xl font-black text-white">{value}</p>
                 <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-white/48">{label}</p>
               </div>
@@ -418,11 +418,11 @@ export default function Home() {
 
           {heroProduct && heroPriceInfo && (
             <Link
-              className="kvn-reveal kvn-reveal-delay-2 kvn-card-lift mt-6 inline-flex max-w-xl items-center justify-between gap-6 overflow-hidden rounded-[4px] border border-white/14 bg-[#10201f]/78 p-4 backdrop-blur transition hover:border-[#d7ff45]/55"
+              className="kvn-reveal kvn-reveal-delay-2 kvn-card-lift mt-6 inline-flex max-w-xl items-center justify-between gap-6 overflow-hidden rounded-[4px] border border-white/14 bg-[#060607]/78 p-4 backdrop-blur transition hover:border-[#d9dde2]/55"
               href={`/produit/${heroProduct.slug}`}
             >
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#d7ff45]">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#d9dde2]">
                   {heroProduct.categoryId === "pack" ? "Pack populaire" : "Produit en vedette"}
                 </p>
                 <h2 className="mt-2 line-clamp-1 text-lg font-black text-white">{heroProduct.name}</h2>
@@ -442,7 +442,7 @@ export default function Home() {
                   aria-label={`Voir ${product.name}`}
                   className={[
                     "h-2 rounded-full transition-all",
-                    index === safeHeroIndex ? "w-10 bg-[#d7ff45]" : "w-2 bg-white/38 hover:bg-white/70",
+                    index === safeHeroIndex ? "w-10 bg-[#d9dde2]" : "w-2 bg-white/38 hover:bg-white/70",
                   ].join(" ")}
                   key={product.id}
                   onClick={() => setHeroIndex(index)}
@@ -470,7 +470,7 @@ export default function Home() {
         tone="solid"
       />
 
-      <div className="overflow-hidden border-y border-white/12 bg-[#101d1c] py-4">
+      <div className="overflow-hidden border-y border-white/12 bg-[#060607] py-4">
         <div className="kvn-marquee flex w-max items-center gap-8 text-2xl font-black uppercase text-white/92">
           {[
             "Jerseys",
@@ -488,7 +488,7 @@ export default function Home() {
           ].map((item, index) => (
             <span className="flex items-center gap-8" key={`${item}-${index}`}>
               {item}
-              <span className="text-[#d7ff45]">/</span>
+              <span className="text-[#d9dde2]">/</span>
             </span>
           ))}
         </div>
@@ -506,10 +506,10 @@ export default function Home() {
 
       <CategoryTiles categories={categories} products={storeProducts} />
 
-      <section className="bg-[#1b2c2b]">
+      <section className="bg-[#14161b]">
         <div className="kvn-reveal mx-auto grid max-w-7xl gap-5 px-4 py-12 sm:grid-cols-[1fr_auto] sm:items-center sm:px-6 lg:px-8">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d7ff45]">No online payment</p>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d9dde2]">No online payment</p>
             <h2 className="mt-3 text-3xl font-black uppercase leading-none text-white sm:text-4xl">
               Commande simple, confirmation sur WhatsApp.
             </h2>

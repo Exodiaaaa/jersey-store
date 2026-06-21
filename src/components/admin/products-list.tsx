@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Edit3, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { clientApi } from "@/lib/client-api";
-import { getProductPriceInfo } from "@/lib/catalog";
+import { getAvailableProductTypes, getProductPriceInfo } from "@/lib/catalog";
 import { Category, Product, Team } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductMedia } from "@/components/product/product-media";
@@ -57,8 +57,13 @@ export function ProductsList() {
       <div className="grid gap-4">
         {items.map((product) => {
           const totalStock = product.sizes.reduce((sum, size) => sum + (product.stock[size] ?? 0), 0);
-          const jerseyPriceInfo = getProductPriceInfo(product, "jersey");
-          const packPriceInfo = getProductPriceInfo(product, "pack");
+          const availableTypes = getAvailableProductTypes(product);
+          const jerseyPriceInfo = availableTypes.includes("jersey")
+            ? getProductPriceInfo(product, "jersey")
+            : undefined;
+          const packPriceInfo = availableTypes.includes("pack")
+            ? getProductPriceInfo(product, "pack")
+            : undefined;
 
           return (
             <article
@@ -74,22 +79,26 @@ export function ProductsList() {
                 </div>
                 <h2 className="mt-3 truncate text-lg font-black text-white">{product.name}</h2>
                 <div className="mt-2 grid gap-3 text-sm text-zinc-400 sm:grid-cols-3">
-                  <div>
-                    <span className="text-xs text-zinc-500">Maillot</span>
-                    <PriceDisplay
-                      currentPrice={jerseyPriceInfo.currentPrice}
-                      originalPrice={jerseyPriceInfo.originalPrice}
-                      size="sm"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-xs text-zinc-500">Pack</span>
-                    <PriceDisplay
-                      currentPrice={packPriceInfo.currentPrice}
-                      originalPrice={packPriceInfo.originalPrice}
-                      size="sm"
-                    />
-                  </div>
+                  {jerseyPriceInfo && (
+                    <div>
+                      <span className="text-xs text-zinc-500">Maillot</span>
+                      <PriceDisplay
+                        currentPrice={jerseyPriceInfo.currentPrice}
+                        originalPrice={jerseyPriceInfo.originalPrice}
+                        size="sm"
+                      />
+                    </div>
+                  )}
+                  {packPriceInfo && (
+                    <div>
+                      <span className="text-xs text-zinc-500">Pack</span>
+                      <PriceDisplay
+                        currentPrice={packPriceInfo.currentPrice}
+                        originalPrice={packPriceInfo.originalPrice}
+                        size="sm"
+                      />
+                    </div>
+                  )}
                   <span>Stock total : {totalStock}</span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">

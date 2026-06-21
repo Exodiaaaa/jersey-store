@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
 import { sizes as defaultSizes } from "@/data/catalog";
 import { clientApi } from "@/lib/client-api";
-import { Category, Product, ProductCategoryId, ProductVisual, Size, StockBySize, Team } from "@/lib/types";
+import { Category, Product, ProductCategoryId, ProductType, ProductVisual, Size, StockBySize, Team } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductImageUploader } from "@/components/admin/product-image-uploader";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -40,6 +40,13 @@ function optionalPrice(value: string) {
   return price > 0 ? price : undefined;
 }
 
+function resolveProductTypes(product: Product) {
+  return {
+    hasJersey: product.hasJersey ?? true,
+    hasPack: product.hasPack ?? false,
+  };
+}
+
 function createBlankProduct(categoryItems: Category[], teamItems: Team[], sizeItems: Size[]): Product {
   return {
     id: `prod-${Date.now()}`,
@@ -49,6 +56,8 @@ function createBlankProduct(categoryItems: Category[], teamItems: Team[], sizeIt
     categoryId: categoryItems[0]?.id ?? "jersey",
     basePrice: 249,
     packPrice: 329,
+    hasJersey: true,
+    hasPack: false,
     flockingPrice: 39,
     description: "",
     sizes: sizeItems,
@@ -73,6 +82,7 @@ export function ProductForm({ productId }: ProductFormProps) {
   const [productToSave, setProductToSave] = useState<Product | null>(null);
 
   const isEditing = Boolean(productId);
+  const { hasJersey, hasPack } = resolveProductTypes(product);
 
   useEffect(() => {
     void Promise.all([clientApi.getCategories(), clientApi.getTeams(), clientApi.getSizes()]).then(
@@ -114,6 +124,26 @@ export function ProductForm({ productId }: ProductFormProps) {
     setProduct((current) => ({ ...current, [key]: value }));
   };
 
+  const updateProductTypeAvailability = (type: ProductType, isAvailable: boolean) => {
+    setProduct((current) => {
+      const currentTypes = resolveProductTypes(current);
+      const nextHasJersey = type === "jersey" ? isAvailable : currentTypes.hasJersey;
+      const nextHasPack = type === "pack" ? isAvailable : currentTypes.hasPack;
+
+      if (!nextHasJersey && !nextHasPack) {
+        return current;
+      }
+
+      return {
+        ...current,
+        hasJersey: nextHasJersey,
+        hasPack: nextHasPack,
+        basePrice: nextHasJersey && current.basePrice <= 0 ? 249 : current.basePrice,
+        packPrice: nextHasPack && current.packPrice <= 0 ? 329 : current.packPrice,
+      };
+    });
+  };
+
   const updateStock = (size: Size, value: number) => {
     setProduct((current) => ({
       ...current,
@@ -153,18 +183,37 @@ export function ProductForm({ productId }: ProductFormProps) {
       return;
     }
 
-    if (product.originalBasePrice && product.originalBasePrice <= product.basePrice) {
+    if (!hasJersey && !hasPack) {
+      setFormError("Choisissez au moins un type vendu : maillot seul ou pack maillot + short.");
+      return;
+    }
+
+    if (hasJersey && product.basePrice <= 0) {
+      setFormError("Le prix du maillot seul doit etre superieur a 0.");
+      return;
+    }
+
+    if (hasPack && product.packPrice <= 0) {
+      setFormError("Le prix du pack maillot + short doit etre superieur a 0.");
+      return;
+    }
+
+    if (hasJersey && product.originalBasePrice && product.originalBasePrice <= product.basePrice) {
       setFormError("L'ancien prix maillot doit etre superieur au prix actuel.");
       return;
     }
 
-    if (product.originalPackPrice && product.originalPackPrice <= product.packPrice) {
+    if (hasPack && product.originalPackPrice && product.originalPackPrice <= product.packPrice) {
       setFormError("L'ancien prix pack doit etre superieur au prix actuel.");
       return;
     }
 
     const cleanProduct = {
       ...product,
+      hasJersey,
+      hasPack,
+      originalBasePrice: hasJersey ? product.originalBasePrice : undefined,
+      originalPackPrice: hasPack ? product.originalPackPrice : undefined,
       slug: product.slug || slugify(product.name),
     };
 
@@ -230,7 +279,7 @@ export function ProductForm({ productId }: ProductFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Categorie</Label>
+            <Label htmlFor="category">Categorie catalogue</Label>
             <Select
               id="category"
               onChange={(event) => updateProduct("categoryId", event.target.value as ProductCategoryId)}
@@ -242,6 +291,9 @@ export function ProductForm({ productId }: ProductFormProps) {
                 </option>
               ))}
             </Select>
+            <p className="text-xs leading-5 text-zinc-500">
+              La categorie sert a organiser le catalogue. Le type vendu se choisit dans la section suivante.
+            </p>
           </div>
         </div>
 
@@ -255,64 +307,101 @@ export function ProductForm({ productId }: ProductFormProps) {
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4">
           <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">
-            <h2 className="text-sm font-black uppercase text-white">Maillot seul</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="basePrice">Prix promo / actuel</Label>
-                <Input
-                  id="basePrice"
-                  min={0}
-                  onChange={(event) => updateProduct("basePrice", Number(event.target.value))}
-                  required
-                  type="number"
-                  value={product.basePrice}
-                />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-sm font-black uppercase text-white">Options vendues</h2>
+                <p className="mt-1 text-xs leading-5 text-zinc-500">
+                  Cochez seulement ce que le client peut commander pour ce produit.
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="originalBasePrice">Ancien prix</Label>
-                <Input
-                  id="originalBasePrice"
-                  min={0}
-                  onChange={(event) => updateProduct("originalBasePrice", optionalPrice(event.target.value))}
-                  placeholder="Ex : 299"
-                  type="number"
-                  value={product.originalBasePrice ?? ""}
-                />
+              <div className="grid gap-2 sm:grid-cols-2">
+                <label className="flex items-center gap-3 rounded-lg border border-white/10 bg-zinc-950/60 p-3 text-sm font-semibold text-zinc-200">
+                  <input
+                    checked={hasJersey}
+                    className="h-4 w-4 accent-amber-300"
+                    onChange={(event) => updateProductTypeAvailability("jersey", event.target.checked)}
+                    type="checkbox"
+                  />
+                  Maillot seul
+                </label>
+                <label className="flex items-center gap-3 rounded-lg border border-white/10 bg-zinc-950/60 p-3 text-sm font-semibold text-zinc-200">
+                  <input
+                    checked={hasPack}
+                    className="h-4 w-4 accent-amber-300"
+                    onChange={(event) => updateProductTypeAvailability("pack", event.target.checked)}
+                    type="checkbox"
+                  />
+                  Maillot + short
+                </label>
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">
-            <h2 className="text-sm font-black uppercase text-white">Pack maillot + short</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="packPrice">Prix promo / actuel</Label>
-                <Input
-                  id="packPrice"
-                  min={0}
-                  onChange={(event) => updateProduct("packPrice", Number(event.target.value))}
-                  required
-                  type="number"
-                  value={product.packPrice}
-                />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {hasJersey && (
+              <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">
+                <h2 className="text-sm font-black uppercase text-white">Prix maillot seul</h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="basePrice">Prix promo / actuel</Label>
+                    <Input
+                      id="basePrice"
+                      min={0}
+                      onChange={(event) => updateProduct("basePrice", Number(event.target.value))}
+                      required={hasJersey}
+                      type="number"
+                      value={product.basePrice}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="originalBasePrice">Ancien prix</Label>
+                    <Input
+                      id="originalBasePrice"
+                      min={0}
+                      onChange={(event) => updateProduct("originalBasePrice", optionalPrice(event.target.value))}
+                      placeholder="Ex : 299"
+                      type="number"
+                      value={product.originalBasePrice ?? ""}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="originalPackPrice">Ancien prix</Label>
-                <Input
-                  id="originalPackPrice"
-                  min={0}
-                  onChange={(event) => updateProduct("originalPackPrice", optionalPrice(event.target.value))}
-                  placeholder="Ex : 399"
-                  type="number"
-                  value={product.originalPackPrice ?? ""}
-                />
+            )}
+
+            {hasPack && (
+              <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">
+                <h2 className="text-sm font-black uppercase text-white">Prix maillot + short</h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="packPrice">Prix promo / actuel</Label>
+                    <Input
+                      id="packPrice"
+                      min={0}
+                      onChange={(event) => updateProduct("packPrice", Number(event.target.value))}
+                      required={hasPack}
+                      type="number"
+                      value={product.packPrice}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="originalPackPrice">Ancien prix</Label>
+                    <Input
+                      id="originalPackPrice"
+                      min={0}
+                      onChange={(event) => updateProduct("originalPackPrice", optionalPrice(event.target.value))}
+                      placeholder="Ex : 399"
+                      type="number"
+                      value={product.originalPackPrice ?? ""}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          <div className="space-y-2 sm:col-span-2">
+          <div className="space-y-2">
             <Label htmlFor="flockingPrice">Prix flocage</Label>
             <Input
               id="flockingPrice"

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { getProductCategoryName, getProductPriceInfo, getProductTeamName } from "@/lib/catalog";
+import { getDefaultProductType, getProductCategoryName, getProductPriceInfo, getProductTeamName } from "@/lib/catalog";
 import { Product } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
@@ -13,13 +13,13 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, className = "" }: ProductCardProps) {
-  const priceInfo = getProductPriceInfo(product, product.categoryId === "pack" ? "pack" : "jersey");
+  const priceInfo = getProductPriceInfo(product, getDefaultProductType(product));
   const hasPromo = Boolean(priceInfo.originalPrice);
 
   return (
     <article
       className={[
-        "kvn-reveal kvn-card-lift group overflow-hidden rounded-[4px] bg-[#172625] shadow-[0_16px_42px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:bg-[#101d1c]",
+        "kvn-reveal kvn-card-lift group overflow-hidden rounded-[4px] bg-[#111318] shadow-[0_16px_42px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:bg-[#060607]",
         className,
       ].join(" ")}
     >

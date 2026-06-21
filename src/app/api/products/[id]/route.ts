@@ -20,6 +20,8 @@ function productPayload(product: Product) {
     packPrice: product.packPrice,
     originalBasePrice: product.originalBasePrice ?? null,
     originalPackPrice: product.originalPackPrice ?? null,
+    hasJersey: product.hasJersey ?? true,
+    hasPack: product.hasPack ?? false,
     flockingPrice: product.flockingPrice,
     description: product.description,
     visualPrimary: product.visual.primary,

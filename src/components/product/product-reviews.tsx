@@ -27,7 +27,7 @@ function RatingStars({
         const isActive = value <= rating;
         const Icon = (
           <Star
-            className={isActive ? "fill-[#d7ff45] text-[#d7ff45]" : "text-white/24"}
+            className={isActive ? "fill-[#d9dde2] text-[#d9dde2]" : "text-white/24"}
             size={interactive ? 22 : 16}
           />
         );
@@ -89,13 +89,13 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
   };
 
   return (
-    <section className="mt-10 rounded-[4px] border border-white/12 bg-[#172625] p-5">
+    <section className="mt-10 rounded-[4px] border border-white/12 bg-[#111318] p-5">
       <div className="flex flex-col gap-4 border-b border-white/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase text-[#d7ff45]">Avis clients</p>
+          <p className="text-sm font-semibold uppercase text-[#d9dde2]">Avis clients</p>
           <h2 className="mt-2 text-2xl font-black text-white">Ce que pensent les clients</h2>
         </div>
-        <div className="rounded-[4px] border border-white/10 bg-[#10201f] p-3">
+        <div className="rounded-[4px] border border-white/10 bg-[#060607] p-3">
           <div className="flex items-center gap-3">
             <RatingStars rating={Math.round(averageRating)} />
             <span className="text-sm font-bold text-white">
@@ -120,7 +120,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
           </div>
           <div className="space-y-2">
             <Label>Note</Label>
-            <div className="flex h-11 items-center rounded-lg border border-white/10 bg-[#10201f] px-2">
+            <div className="flex h-11 items-center rounded-lg border border-white/10 bg-[#060607] px-2">
               <RatingStars interactive onSelect={setRating} rating={rating} />
             </div>
           </div>
@@ -143,12 +143,12 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
 
       <div className="mt-6 grid gap-3">
         {reviews.length === 0 && (
-          <p className="rounded-[4px] border border-white/10 bg-[#10201f] p-4 text-sm text-white/48">
+          <p className="rounded-[4px] border border-white/10 bg-[#060607] p-4 text-sm text-white/48">
             Aucun avis pour ce produit pour le moment.
           </p>
         )}
         {reviews.map((review) => (
-          <article className="rounded-[4px] border border-white/10 bg-[#10201f] p-4" key={review.id}>
+          <article className="rounded-[4px] border border-white/10 bg-[#060607] p-4" key={review.id}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="font-bold text-white">{review.customerName}</h3>

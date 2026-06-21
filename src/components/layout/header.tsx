@@ -32,7 +32,7 @@ export function Header() {
   }
 
   return (
-    <header className="kvn-site-header sticky top-0 z-40 border-b border-white/10 bg-[#314948]/92 backdrop-blur-xl">
+    <header className="kvn-site-header sticky top-0 z-40 border-b border-white/10 bg-[#090a0c]/92 backdrop-blur-xl">
       <div className="mx-auto grid h-20 w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 md:hidden">
           <button
@@ -54,7 +54,7 @@ export function Header() {
               className={[
                 "rounded-[4px] px-3 py-2 text-sm font-black transition",
                 pathname === item.href
-                  ? "bg-[#d7ff45] text-[#10201f]"
+                  ? "bg-[#d9dde2] text-[#060607]"
                   : "text-white/78 hover:bg-white/[0.08] hover:text-white",
               ].join(" ")}
               href={item.href}
@@ -86,7 +86,7 @@ export function Header() {
       </div>
 
       {isOpen && (
-        <div className="border-t border-white/10 bg-[#263c3b] px-4 py-4 md:hidden">
+        <div className="border-t border-white/10 bg-[#111318] px-4 py-4 md:hidden">
           <nav className="mx-auto grid max-w-7xl gap-2">
             {navItems.map((item) => (
               <Link

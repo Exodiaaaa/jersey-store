@@ -34,14 +34,14 @@ export function ConfirmDialog({
       className="fixed inset-0 z-50 grid place-items-center bg-black/72 px-4 backdrop-blur-sm"
       role="dialog"
     >
-      <div className="w-full max-w-md rounded-lg border border-white/10 bg-[#10201f] p-5 shadow-2xl">
+      <div className="w-full max-w-md rounded-lg border border-white/10 bg-[#060607] p-5 shadow-2xl">
         <div className="flex items-start gap-3">
           <span
             className={[
               "grid h-11 w-11 shrink-0 place-items-center rounded-lg border",
               tone === "danger"
                 ? "border-red-400/35 bg-red-500/12 text-red-100"
-                : "border-[#d7ff45]/35 bg-[#d7ff45]/12 text-[#ecff9c]",
+                : "border-[#d9dde2]/35 bg-white/10 text-[#f5f7f9]",
             ].join(" ")}
           >
             <AlertTriangle size={22} />

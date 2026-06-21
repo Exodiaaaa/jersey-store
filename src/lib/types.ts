@@ -50,6 +50,8 @@ export type Product = {
   packPrice: number;
   originalBasePrice?: number;
   originalPackPrice?: number;
+  hasJersey?: boolean;
+  hasPack?: boolean;
   flockingPrice: number;
   description: string;
   sizes: Size[];

@@ -38,4 +38,13 @@ describe("catalog helpers", () => {
     assert.deepEqual(getAvailableProductTypes(makeProduct({ categoryId: "pack" })), ["pack", "jersey"]);
     assert.deepEqual(getAvailableProductTypes(makeProduct({ categoryId: "jersey" })), ["jersey", "pack"]);
   });
+
+  test("priorise les types reellement vendus quand ils sont configures", () => {
+    assert.deepEqual(getAvailableProductTypes(makeProduct({ hasJersey: true, hasPack: false })), ["jersey"]);
+    assert.deepEqual(getAvailableProductTypes(makeProduct({ hasJersey: false, hasPack: true })), ["pack"]);
+    assert.deepEqual(
+      getAvailableProductTypes(makeProduct({ categoryId: "pack", hasJersey: true, hasPack: true })),
+      ["pack", "jersey"],
+    );
+  });
 });

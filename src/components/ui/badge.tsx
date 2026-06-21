@@ -6,10 +6,10 @@ type BadgeProps = {
 };
 
 const tones = {
-  lime: "border-[#d7ff45]/40 bg-[#d7ff45]/12 text-[#ecff9c]",
+  lime: "border-[#d9dde2]/40 bg-white/10 text-[#f5f7f9]",
   silver: "border-white/15 bg-white/10 text-zinc-200",
   red: "border-red-300/30 bg-red-400/12 text-red-100",
-  blue: "border-sky-300/30 bg-sky-300/12 text-sky-100",
+  blue: "border-[#d9dde2]/30 bg-white/10 text-[#e8eaed]",
 };
 
 export function Badge({ children, tone = "silver", className = "" }: PropsWithChildren<BadgeProps>) {

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #314948;
+  --background: #090a0c;
   --foreground: #f8fafc;
 }
 
@@ -25,7 +25,7 @@ body {
 body::before {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(215, 255, 69, 0.035) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(217, 221, 226, 0.035) 1px, transparent 1px);
   background-size: 44px 44px;
   content: "";
   inset: 0;
@@ -38,7 +38,7 @@ body::before {
 body::after {
   background: radial-gradient(
     circle at var(--kvn-cursor-x, 70%) var(--kvn-cursor-y, 20%),
-    rgba(215, 255, 69, 0.12),
+    rgba(217, 221, 226, 0.13),
     transparent 28rem
   );
   content: "";
@@ -56,8 +56,8 @@ body > * {
 }
 
 ::selection {
-  background: #d7ff45;
-  color: #10201f;
+  background: #d9dde2;
+  color: #060607;
 }
 
 .kvn-rail-scroll {
@@ -76,7 +76,7 @@ button {
 }
 
 option {
-  background: #10201f;
+  background: #060607;
   color: #fafafa;
 }
 
@@ -91,7 +91,7 @@ option {
 .kvn-loader {
   align-items: center;
   animation: kvn-loader-out 240ms ease 720ms forwards;
-  background: #101d1c;
+  background: #060607;
   color: #ffffff;
   display: grid;
   gap: 1rem;
@@ -104,8 +104,8 @@ option {
 
 .kvn-loader-mark {
   animation: kvn-loader-pulse 740ms ease-in-out infinite alternate;
-  border: 1px solid rgba(215, 255, 69, 0.42);
-  color: #d7ff45;
+  border: 1px solid rgba(217, 221, 226, 0.42);
+  color: #f5f7f9;
   display: grid;
   font-size: 2.5rem;
   font-weight: 900;
@@ -194,7 +194,7 @@ option {
 }
 
 .kvn-scrolled .kvn-site-header {
-  background: rgba(16, 29, 28, 0.92);
+  background: rgba(6, 6, 7, 0.92);
   box-shadow: 0 14px 45px rgba(0, 0, 0, 0.22);
 }
 
@@ -210,12 +210,12 @@ option {
 
 @keyframes kvn-loader-pulse {
   from {
-    box-shadow: 0 0 0 rgba(215, 255, 69, 0);
+    box-shadow: 0 0 0 rgba(217, 221, 226, 0);
     transform: scale(0.96);
   }
 
   to {
-    box-shadow: 0 0 36px rgba(215, 255, 69, 0.24);
+    box-shadow: 0 0 36px rgba(217, 221, 226, 0.24);
     transform: scale(1);
   }
 }

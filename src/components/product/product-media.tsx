@@ -23,12 +23,12 @@ export function ProductMedia({ name, images = [], image, className = "" }: Produ
       <div
         aria-label={`${name} - photo a ajouter`}
         className={[
-          "relative isolate flex aspect-[4/5] flex-col items-center justify-center overflow-hidden rounded-[4px] border border-dashed border-white/15 bg-[#10201f] text-center",
+          "relative isolate flex aspect-[4/5] flex-col items-center justify-center overflow-hidden rounded-[4px] border border-dashed border-white/15 bg-[#060607] text-center",
           className,
         ].join(" ")}
         role="img"
       >
-        <span className="grid h-12 w-12 place-items-center rounded-[4px] border border-white/10 bg-white/[0.04] text-[#d7ff45]">
+        <span className="grid h-12 w-12 place-items-center rounded-[4px] border border-white/10 bg-white/[0.04] text-[#d9dde2]">
           <ImagePlus size={24} />
         </span>
         <span className="mt-3 text-sm font-bold text-white">Photo a ajouter</span>
@@ -43,7 +43,7 @@ export function ProductMedia({ name, images = [], image, className = "" }: Produ
     <div
       aria-label={name}
       className={[
-        "relative isolate aspect-[4/5] overflow-hidden rounded-[4px] border border-white/10 bg-[#10201f] bg-cover bg-center",
+        "relative isolate aspect-[4/5] overflow-hidden rounded-[4px] border border-white/10 bg-[#060607] bg-cover bg-center",
         className,
       ].join(" ")}
       role="img"

@@ -65,7 +65,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                   aria-label={`Voir photo ${index + 1}`}
                   className={[
                     "aspect-square rounded-lg border bg-cover bg-center transition",
-                    image === selectedImage ? "border-[#d7ff45]" : "border-white/10 hover:border-white/30",
+                    image === selectedImage ? "border-[#d9dde2]" : "border-white/10 hover:border-white/30",
                   ].join(" ")}
                   key={`${image}-${index}`}
                   onClick={() => setSelectedImage(image)}
@@ -98,8 +98,8 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     className={[
                       "relative h-11 overflow-hidden rounded-lg border text-sm font-bold transition",
                       item === size
-                        ? "border-[#d7ff45] bg-[#d7ff45] text-[#10201f]"
-                        : "border-white/10 bg-[#10201f] text-zinc-200 hover:border-white/25",
+                        ? "border-[#d9dde2] bg-[#d9dde2] text-[#060607]"
+                        : "border-white/10 bg-[#060607] text-zinc-200 hover:border-white/25",
                       disabled ? "cursor-not-allowed opacity-50" : "",
                     ].join(" ")}
                     disabled={disabled}
@@ -131,8 +131,8 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     className={[
                       "rounded-lg border p-3 text-left transition",
                       item === type
-                        ? "border-[#d7ff45] bg-[#d7ff45] text-[#10201f]"
-                        : "border-white/10 bg-[#10201f] text-zinc-200 hover:border-white/25",
+                        ? "border-[#d9dde2] bg-[#d9dde2] text-[#060607]"
+                        : "border-white/10 bg-[#060607] text-zinc-200 hover:border-white/25",
                     ].join(" ")}
                     key={item}
                     onClick={() => setType(item)}
@@ -165,8 +165,8 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     className={[
                       "h-11 rounded-lg border px-3 text-sm font-bold transition",
                       flockingMode === value
-                        ? "border-[#d7ff45] bg-[#d7ff45] text-[#10201f]"
-                        : "border-white/10 bg-[#10201f] text-zinc-200 hover:border-white/25",
+                        ? "border-[#d9dde2] bg-[#d9dde2] text-[#060607]"
+                        : "border-white/10 bg-[#060607] text-zinc-200 hover:border-white/25",
                     ].join(" ")}
                     key={value}
                     onClick={() => setFlockingMode(value as FlockingMode)}
@@ -209,7 +209,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                       value={flockingNote}
                     />
                   </div>
-                  <p className="rounded-lg border border-[#d7ff45]/25 bg-[#d7ff45]/10 p-3 text-sm font-semibold text-[#ecff9c] sm:col-span-2">
+                  <p className="rounded-lg border border-[#d9dde2]/25 bg-white/10 p-3 text-sm font-semibold text-[#f5f7f9] sm:col-span-2">
                     Une avance est demandee avant preparation pour toute commande avec flocage.
                   </p>
                 </div>
@@ -218,7 +218,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           )}
 
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-4">
-            <div className="inline-flex h-11 items-center rounded-lg border border-white/10 bg-[#10201f]">
+            <div className="inline-flex h-11 items-center rounded-lg border border-white/10 bg-[#060607]">
               <button
                 className="grid h-11 w-11 place-items-center text-zinc-300 disabled:opacity-40"
                 disabled={quantity <= 1}

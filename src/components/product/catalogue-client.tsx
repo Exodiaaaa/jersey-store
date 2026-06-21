@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { RotateCcw, Search, SlidersHorizontal } from "lucide-react";
 import { clientApi } from "@/lib/client-api";
-import { getAvailableProductTypes, getProductCurrentPrice, ProductFilters } from "@/lib/catalog";
+import { getAvailableProductTypes, getLowestAvailablePrice, getProductCurrentPrice, ProductFilters } from "@/lib/catalog";
 import { Category, Product, ProductCategoryId, Size, Team } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/field";
@@ -105,11 +105,11 @@ export function CatalogueClient() {
       const selectedSize = filters.size ?? "all";
       const selectedNovelty = filters.novelty ?? "all";
       const filterPrice =
-        selectedCategory === "pack"
+        selectedCategory === "pack" && availableTypes.includes("pack")
           ? getProductCurrentPrice(product, "pack")
-          : selectedCategory === "jersey"
+          : selectedCategory === "jersey" && availableTypes.includes("jersey")
             ? getProductCurrentPrice(product, "jersey")
-            : Math.min(getProductCurrentPrice(product, "jersey"), getProductCurrentPrice(product, "pack"));
+            : getLowestAvailablePrice(product);
 
       const matchesQuery =
         !query ||
@@ -121,9 +121,11 @@ export function CatalogueClient() {
       const matchesTeam = selectedTeam === "all" || product.teamId === selectedTeam;
       const matchesCategory =
         selectedCategory === "all" ||
-        (selectedCategory === "jersey" && availableTypes.includes("jersey")) ||
-        (selectedCategory === "pack" && availableTypes.includes("pack")) ||
-        product.categoryId === selectedCategory;
+        (selectedCategory === "jersey"
+          ? availableTypes.includes("jersey")
+          : selectedCategory === "pack"
+            ? availableTypes.includes("pack")
+            : product.categoryId === selectedCategory);
       const matchesSize =
         selectedSize === "all" || (product.sizes.includes(selectedSize) && product.stock[selectedSize] > 0);
       const matchesPrice = !filters.maxPrice || filterPrice <= filters.maxPrice;
@@ -152,10 +154,10 @@ export function CatalogueClient() {
 
   return (
     <div className="grid gap-7">
-      <section className="kvn-reveal rounded-[4px] border border-white/12 bg-[#172625] p-4 shadow-[0_18px_55px_rgba(0,0,0,0.16)] sm:p-5">
+      <section className="kvn-reveal rounded-[4px] border border-white/12 bg-[#111318] p-4 shadow-[0_18px_55px_rgba(0,0,0,0.16)] sm:p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d7ff45]">Store</p>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d9dde2]">Store</p>
             <h1 className="mt-2 text-4xl font-black uppercase leading-none text-white sm:text-5xl">
               Find your kit.
             </h1>
@@ -252,7 +254,7 @@ export function CatalogueClient() {
             <div className="space-y-3">
               <Label htmlFor="price">Prix max : {filters.maxPrice} MAD</Label>
               <input
-                className="h-2 w-full accent-[#d7ff45]"
+                className="h-2 w-full accent-[#d9dde2]"
                 id="price"
                 max="450"
                 min="100"

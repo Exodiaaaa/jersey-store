@@ -42,13 +42,42 @@ export function getProductPriceInfo(product: Product, type: ProductType) {
 }
 
 export function getAvailableProductTypes(product: Product): ProductType[] {
+  const hasConfiguredTypes = product.hasJersey !== undefined || product.hasPack !== undefined;
+
+  if (hasConfiguredTypes) {
+    const types: ProductType[] = [];
+
+    if (product.hasJersey) {
+      types.push("jersey");
+    }
+
+    if (product.hasPack) {
+      types.push("pack");
+    }
+
+    if (types.length === 0) {
+      return ["jersey"];
+    }
+
+    if (product.categoryId === "pack" && types.includes("pack")) {
+      return ["pack", ...types.filter((type) => type !== "pack")];
+    }
+
+    return types;
+  }
+
   if (product.categoryId === "accessory") {
     return ["jersey"];
   }
 
-  if (product.categoryId === "pack") {
-    return ["pack", "jersey"];
-  }
+  return product.categoryId === "pack" ? ["pack", "jersey"] : ["jersey", "pack"];
+}
 
-  return ["jersey", "pack"];
+export function getDefaultProductType(product: Product): ProductType {
+  return getAvailableProductTypes(product)[0] ?? "jersey";
+}
+
+export function getLowestAvailablePrice(product: Product) {
+  const types = getAvailableProductTypes(product);
+  return Math.min(...types.map((type) => getProductCurrentPrice(product, type)));
 }

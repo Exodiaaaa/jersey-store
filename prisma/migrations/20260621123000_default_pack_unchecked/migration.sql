@@ -1,0 +1,2 @@
+ALTER TABLE `products`
+  MODIFY COLUMN `hasPack` BOOLEAN NOT NULL DEFAULT false;

@@ -12,6 +12,8 @@ type DbProduct = {
   packPrice: number;
   originalBasePrice: number | null;
   originalPackPrice: number | null;
+  hasJersey?: boolean;
+  hasPack?: boolean;
   flockingPrice: number;
   description: string;
   visualPrimary: string;
@@ -118,6 +120,8 @@ export function mapDbProduct(product: DbProduct): Product {
     packPrice: product.packPrice,
     originalBasePrice: product.originalBasePrice ?? undefined,
     originalPackPrice: product.originalPackPrice ?? undefined,
+    hasJersey: product.hasJersey ?? true,
+    hasPack: product.hasPack ?? product.categoryId !== "accessory",
     flockingPrice: product.flockingPrice,
     description: product.description,
     sizes,
