@@ -26,7 +26,7 @@ export function Header() {
 
   return (
     <header className="kvn-site-header sticky top-0 z-40 border-b border-white/10 bg-[#090a0c]/92 backdrop-blur-xl">
-      <div className="mx-auto grid h-20 w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto grid h-20 w-full max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 sm:grid-cols-[1fr_auto_1fr] sm:gap-3 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 md:hidden">
           <button
             aria-label="Menu"
@@ -58,19 +58,26 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="justify-self-center">
-          <Logo />
+        <div className="min-w-0 justify-self-center">
+          <span className="hidden min-[360px]:inline-flex">
+            <Logo />
+          </span>
+          <span className="inline-flex min-[360px]:hidden">
+            <Logo compact />
+          </span>
         </div>
 
         <div className="flex items-center justify-end gap-2">
-          <Link className={buttonClassName("secondary", "icon", "hidden md:inline-flex")} href="/catalogue">
-            <Search size={18} />
-          </Link>
+          <span className="hidden md:block">
+            <Link className={buttonClassName("secondary", "icon")} href="/catalogue">
+              <Search size={18} />
+            </Link>
+          </span>
           <Link className={buttonClassName("primary", "md", "relative")} href="/panier">
             <ShoppingBag size={18} />
             <span className="hidden sm:inline">Panier</span>
             {count > 0 && (
-              <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-xs text-white">
+              <span className="absolute right-0 top-0 grid h-5 min-w-5 translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-red-500 px-1 text-xs text-white">
                 {count}
               </span>
             )}
