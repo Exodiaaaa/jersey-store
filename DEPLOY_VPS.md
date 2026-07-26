@@ -94,7 +94,32 @@ BACKUP_FILE=/var/backups/kvn-footwear/kvn_footwear_YYYY-MM-DDTHH-MM-SSZ.sql.gz
 gunzip -c "$BACKUP_FILE" | docker compose -f docker-compose.prod.yml --env-file .env.production exec -T mysql sh -ceu 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysql --host=127.0.0.1 --user="$MYSQL_USER" "$MYSQL_DATABASE"'
 ```
 
-## 5. Verification apres deploiement
+## 5. Reinitialiser completement la base
+
+Cette operation supprime toutes les commandes, produits et configurations, puis reapplique les migrations, le seed et recree le compte administrateur. Une sauvegarde verifiee est obligatoire et automatique avant la suppression.
+
+Verifier d'abord les etapes sans modifier la base :
+
+```bash
+cd /var/www/kvn-footwear
+chmod 0750 deploy/reset-db.sh
+./deploy/reset-db.sh \
+  --admin-email admin@kvnfootwear.ma \
+  --confirm RESET-KVN-FOOTWEAR \
+  --dry-run
+```
+
+Executer reellement le reset uniquement lorsque la perte des donnees courantes est voulue :
+
+```bash
+./deploy/reset-db.sh \
+  --admin-email admin@kvnfootwear.ma \
+  --confirm RESET-KVN-FOOTWEAR
+```
+
+Le nouveau mot de passe admin est demande sans s'afficher. Si une etape echoue apres la suppression, l'application reste arretee afin de ne pas servir une base incomplete.
+
+## 6. Verification apres deploiement
 
 ```bash
 curl -I https://kvnfootwear.ma
