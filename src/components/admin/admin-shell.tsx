@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Gauge,
+  KeyRound,
   Layers3,
   LayoutTemplate,
   LogOut,
@@ -16,6 +17,7 @@ import { PropsWithChildren, useState } from "react";
 import { logoutAdmin } from "@/lib/admin-auth";
 import { buttonClassName } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { ChangePasswordDialog } from "@/components/admin/change-password-dialog";
 
 const adminNav = [
   { href: "/admin/dashboard", label: "Dashboard", icon: Gauge },
@@ -31,6 +33,7 @@ export function AdminShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
 
   if (isLoginPage) {
     return <>{children}</>;
@@ -72,25 +75,54 @@ export function AdminShell({ children }: PropsWithChildren) {
             );
           })}
         </nav>
-        <button
-          className={buttonClassName("ghost", "md", "absolute bottom-5 left-5 right-5")}
-          disabled={isLoggingOut}
-          onClick={() => void logout()}
-          type="button"
-        >
-          <LogOut size={18} />
-          {isLoggingOut ? "Deconnexion..." : "Deconnexion"}
-        </button>
+        <div className="absolute bottom-5 left-5 right-5 grid gap-2">
+          <button
+            className={buttonClassName("ghost", "md", "w-full")}
+            onClick={() => setIsPasswordDialogOpen(true)}
+            type="button"
+          >
+            <KeyRound size={18} />
+            Changer le mot de passe
+          </button>
+          <button
+            className={buttonClassName("ghost", "md", "w-full")}
+            disabled={isLoggingOut}
+            onClick={() => void logout()}
+            type="button"
+          >
+            <LogOut size={18} />
+            {isLoggingOut ? "Deconnexion..." : "Deconnexion"}
+          </button>
+        </div>
       </aside>
 
       <div className="lg:pl-72">
         <header className="sticky top-0 z-20 border-b border-white/10 bg-zinc-950/86 px-4 py-3 backdrop-blur-xl sm:px-6 lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <Logo compact />
-            <Link className={buttonClassName("secondary", "sm")} href="/admin/dashboard">
-              <ShieldCheck size={16} />
-              Admin
-            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                aria-label="Changer le mot de passe"
+                className={buttonClassName("secondary", "icon")}
+                onClick={() => setIsPasswordDialogOpen(true)}
+                type="button"
+              >
+                <KeyRound size={16} />
+              </button>
+              <button
+                aria-label="Deconnexion"
+                className={buttonClassName("secondary", "icon")}
+                disabled={isLoggingOut}
+                onClick={() => void logout()}
+                type="button"
+              >
+                <LogOut size={16} />
+              </button>
+              <Link className={buttonClassName("secondary", "sm")} href="/admin/dashboard">
+                <ShieldCheck size={16} />
+                Admin
+              </Link>
+            </div>
           </div>
           <nav className="mt-3 flex gap-2 overflow-x-auto pb-1">
             {adminNav.map((item) => {
@@ -110,6 +142,7 @@ export function AdminShell({ children }: PropsWithChildren) {
         </header>
         <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{children}</main>
       </div>
+      <ChangePasswordDialog isOpen={isPasswordDialogOpen} onClose={() => setIsPasswordDialogOpen(false)} />
     </div>
   );
 }

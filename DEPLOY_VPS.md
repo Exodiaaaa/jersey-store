@@ -2,13 +2,12 @@
 
 Le projet est installe dans `/var/www/kvn-footwear` et publie localement par Docker sur `127.0.0.1:3000`. Nginx gere le domaine et HTTPS.
 
-## 1. Variables de production
+## 1. Variables de production et secret JWT
 
-Ne jamais commiter `.env.production`. Les identifiants admin restent uniquement sur le serveur.
+Ne jamais commiter `.env.production`. Les identifiants admin sont stockes dans MySQL avec un hash bcrypt et ne figurent plus dans ce fichier.
 
 ```bash
 cd /var/www/kvn-footwear
-openssl rand -hex 32
 nano .env.production
 ```
 
@@ -21,14 +20,19 @@ MYSQL_PASSWORD=mot_de_passe_mysql_fort
 MYSQL_ROOT_PASSWORD=mot_de_passe_root_mysql_fort
 DATABASE_URL=mysql://kvn_user:mot_de_passe_mysql_fort@mysql:3306/kvn_footwear
 
-ADMIN_EMAIL=admin@kvnfootwear.ma
-ADMIN_PASSWORD=mot_de_passe_admin_unique_et_fort
-ADMIN_SESSION_SECRET=resultat_de_openssl_rand_hex_32
-
 BACKUP_RETENTION_DAYS=14
 ```
 
 Si le mot de passe MySQL contient des caracteres reserves dans une URL (`@`, `:`, `/`, `#`, `%`), les encoder dans `DATABASE_URL`.
+
+Le JWT admin est signe avec un Docker secret, jamais avec une variable de `.env.production` :
+
+```bash
+cd /var/www/kvn-footwear
+install -d -m 700 secrets
+umask 077
+openssl rand -hex 32 > secrets/admin_jwt_secret
+```
 
 ## 2. Mettre a jour et lancer
 
@@ -39,6 +43,14 @@ docker compose -f docker-compose.prod.yml --env-file .env.production up -d --bui
 docker compose -f docker-compose.prod.yml --env-file .env.production ps
 curl -I http://127.0.0.1:3000
 ```
+
+Apres la premiere migration vers l'authentification en base, creer le premier administrateur. Le mot de passe est saisi sans s'afficher et n'est ni enregistre dans l'historique du shell ni conserve dans `.env.production` :
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production exec app npm run admin:create -- --email admin@kvnfootwear.ma
+```
+
+Supprimer ensuite les anciennes lignes `ADMIN_EMAIL`, `ADMIN_PASSWORD` et `ADMIN_SESSION_SECRET` de `.env.production` si elles sont encore presentes. Le mot de passe peut ensuite etre modifie directement depuis le back-office.
 
 Les migrations Prisma sont appliquees automatiquement au demarrage de l'application. Le seed reste une operation manuelle et n'ajoute que les donnees initiales manquantes :
 

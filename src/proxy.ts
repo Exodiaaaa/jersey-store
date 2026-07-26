@@ -1,17 +1,20 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { adminSessionCookieName, verifyAdminSessionToken } from "@/lib/admin-session";
+import { adminSessionCookieName, verifyAdminSessionToken } from "@/lib/admin-jwt";
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const isLoginPage = request.nextUrl.pathname === "/admin/login";
-  const isAuthenticated = verifyAdminSessionToken(request.cookies.get(adminSessionCookieName)?.value);
 
-  if (!isLoginPage && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+  if (isLoginPage) {
+    return NextResponse.next();
   }
 
-  if (isLoginPage && isAuthenticated) {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+  const isAuthenticated = Boolean(
+    await verifyAdminSessionToken(request.cookies.get(adminSessionCookieName)?.value),
+  );
+
+  if (!isAuthenticated) {
+    return NextResponse.redirect(new URL("/admin/login", request.url));
   }
 
   return NextResponse.next();

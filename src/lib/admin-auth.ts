@@ -15,3 +15,11 @@ export function loginAdmin(email: string, password: string) {
 export function logoutAdmin() {
   return adminRequest("/api/admin/logout");
 }
+
+export function changeAdminPassword(currentPassword: string, newPassword: string, confirmPassword: string) {
+  return adminRequest("/api/admin/change-password", {
+    confirmPassword,
+    currentPassword,
+    newPassword,
+  });
+}

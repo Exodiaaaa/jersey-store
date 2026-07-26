@@ -22,6 +22,7 @@
 
 # production
 /build
+/secrets/
 
 # misc
 .DS_Store

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminSessionCookieName } from "@/lib/admin-session";
+import { adminSessionCookieName, adminSessionCookieOptions } from "@/lib/admin-jwt";
 
 export async function POST(request: Request) {
   if (request.headers.get("sec-fetch-site") === "cross-site") {
@@ -8,11 +8,8 @@ export async function POST(request: Request) {
 
   const response = NextResponse.json({ ok: true });
   response.cookies.set(adminSessionCookieName, "", {
-    httpOnly: true,
+    ...adminSessionCookieOptions,
     maxAge: 0,
-    path: "/",
-    sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
   });
   return response;
 }

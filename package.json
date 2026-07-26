@@ -13,6 +13,7 @@
     "test:e2e": "node --import tsx --test tests/e2e/**/*.test.ts",
     "test:playwright": "playwright test",
     "screenshots:process": "tsx scripts/generate-process-screenshots.ts",
+    "admin:create": "node scripts/create-admin.mjs",
     "db:create": "node scripts/create-db.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
@@ -25,6 +26,8 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.4",
     "lucide-react": "^1.17.0",
     "next": "^16.2.12",
     "react": "19.2.4",
@@ -45,8 +48,8 @@
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.1",
-    "typescript-eslint": "^8.65.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.65.0"
   },
   "overrides": {
     "brace-expansion": "5.0.8",

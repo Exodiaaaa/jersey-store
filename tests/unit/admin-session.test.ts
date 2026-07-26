@@ -3,38 +3,50 @@ import { beforeEach, describe, test } from "node:test";
 import {
   adminSessionCookieName,
   createAdminSessionToken,
-  hasValidAdminSession,
-  verifyAdminCredentials,
   verifyAdminSessionToken,
-} from "../../src/lib/admin-session";
+} from "../../src/lib/admin-jwt";
+import {
+  hashAdminPassword,
+  validateAdminPassword,
+  verifyAdminPassword,
+} from "../../src/lib/admin-password";
 
-describe("admin session", () => {
+const admin = {
+  adminId: "admin-1",
+  role: "admin" as const,
+  tokenVersion: 2,
+};
+
+describe("admin authentication", () => {
   beforeEach(() => {
-    process.env.ADMIN_EMAIL = "admin@example.test";
-    process.env.ADMIN_PASSWORD = "test-password";
-    process.env.ADMIN_SESSION_SECRET = "test-session-secret-with-at-least-32-characters";
+    process.env.ADMIN_JWT_SECRET = "test-jwt-secret-with-at-least-32-characters";
   });
 
-  test("valide les identifiants uniquement cote serveur", () => {
-    assert.equal(verifyAdminCredentials("ADMIN@example.test", "test-password"), true);
-    assert.equal(verifyAdminCredentials("admin@example.test", "wrong-password"), false);
+  test("hache et verifie le mot de passe", async () => {
+    const passwordHash = await hashAdminPassword("MotDePasseTest2026");
+
+    assert.notEqual(passwordHash, "MotDePasseTest2026");
+    assert.equal(await verifyAdminPassword("MotDePasseTest2026", passwordHash), true);
+    assert.equal(await verifyAdminPassword("MotDePasseIncorrect2026", passwordHash), false);
   });
 
-  test("signe, verifie et expire la session", () => {
+  test("valide la politique de mot de passe", () => {
+    assert.equal(validateAdminPassword("court1"), "Le mot de passe doit contenir au moins 12 caracteres.");
+    assert.equal(validateAdminPassword("MotDePasseSansChiffre"), "Le mot de passe doit contenir au moins une lettre et un chiffre.");
+    assert.equal(validateAdminPassword("MotDePasseValide2026"), null);
+  });
+
+  test("cree un JWT standard, le verifie et l'expire", async () => {
     const now = Date.UTC(2026, 6, 26, 12, 0, 0);
-    const token = createAdminSessionToken(now);
+    const token = await createAdminSessionToken(admin, now);
 
-    assert.equal(verifyAdminSessionToken(token, now), true);
-    assert.equal(verifyAdminSessionToken(`${token}x`, now), false);
-    assert.equal(verifyAdminSessionToken(token, now + 13 * 60 * 60 * 1000), false);
+    assert.equal(token.split(".").length, 3);
+    assert.deepEqual(await verifyAdminSessionToken(token, now), admin);
+    assert.equal(await verifyAdminSessionToken(`${token}x`, now), null);
+    assert.equal(await verifyAdminSessionToken(token, now + 13 * 60 * 60 * 1000), null);
   });
 
-  test("lit la session depuis le cookie HTTP", () => {
-    const token = createAdminSessionToken();
-    const request = new Request("http://localhost/api/dashboard", {
-      headers: { cookie: `${adminSessionCookieName}=${token}` },
-    });
-
-    assert.equal(hasValidAdminSession(request), true);
+  test("utilise un cookie admin distinct", () => {
+    assert.equal(adminSessionCookieName, "kvn_admin_session");
   });
 });

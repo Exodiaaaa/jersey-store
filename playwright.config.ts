@@ -23,6 +23,9 @@ export default defineConfig({
   },
   webServer: {
     command: `npm run dev -- --hostname 127.0.0.1 --port ${port}`,
+    env: {
+      ADMIN_JWT_SECRET: "playwright-jwt-secret-with-at-least-32-characters",
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
     url: baseURL,

@@ -9,14 +9,14 @@ test("affiche l'accueil et les produits provenant de l'API", async ({ page }) =>
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "KVN Footwear" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Voir les maillots/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Shop now/i })).toBeVisible();
   await expect(page.getByText(products[0].name).first()).toBeVisible();
 });
 
 test("filtre le catalogue par recherche", async ({ page }) => {
   await page.goto("/catalogue");
 
-  await expect(page.getByRole("heading", { name: "Trouver une tenue" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Find your kit." })).toBeVisible();
   await expect(page.getByText("2 produit(s)")).toBeVisible();
 
   await page.getByLabel("Recherche").fill("arsenal");

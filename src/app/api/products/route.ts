@@ -49,7 +49,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const authError = requireAdmin(request);
+  const authError = await requireAdmin(request);
   if (authError) return authError;
 
   const product = (await request.json()) as Product;

@@ -15,7 +15,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const authError = requireAdmin(request);
+  const authError = await requireAdmin(request);
   if (authError) return authError;
 
   const body = (await request.json()) as { sizes: Size[] };

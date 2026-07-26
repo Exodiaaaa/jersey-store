@@ -27,7 +27,7 @@ function uniqueProductIds(productIds: string[]) {
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = requireAdmin(request);
+  const authError = await requireAdmin(request);
   if (authError) return authError;
 
   const { id } = await params;
@@ -67,7 +67,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = requireAdmin(request);
+  const authError = await requireAdmin(request);
   if (authError) return authError;
 
   const { id } = await params;

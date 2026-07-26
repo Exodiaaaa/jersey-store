@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { mapDbOrder } from "@/lib/db-mappers";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = requireAdmin(request);
+  const authError = await requireAdmin(request);
   if (authError) return authError;
 
   const { id } = await params;

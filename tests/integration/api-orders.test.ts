@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { before, beforeEach, describe, test } from "node:test";
-import { adminSessionCookieName, createAdminSessionToken } from "../../src/lib/admin-session";
+import { adminSessionCookieName, createAdminSessionToken } from "../../src/lib/admin-jwt";
 
 import { makeCartItem, makeCustomer, makeDbOrder, makeDbOrderItem } from "../helpers/fixtures";
 
@@ -44,6 +44,16 @@ function toDbOrderItems(items: Array<Record<string, unknown>>) {
 }
 
 const fakePrisma = {
+  adminUser: {
+    async findUnique() {
+      return {
+        email: "admin@example.test",
+        id: "admin-1",
+        role: "admin",
+        tokenVersion: 0,
+      };
+    },
+  },
   order: {
     async findUnique() {
       return state.currentOrder;
@@ -133,10 +143,12 @@ async function responseJson(response: Response) {
 
 describe("orders API route handlers", () => {
   before(async () => {
-    process.env.ADMIN_EMAIL = "admin@example.test";
-    process.env.ADMIN_PASSWORD = "test-password";
-    process.env.ADMIN_SESSION_SECRET = "test-session-secret-with-at-least-32-characters";
-    adminCookie = `${adminSessionCookieName}=${createAdminSessionToken()}`;
+    process.env.ADMIN_JWT_SECRET = "test-jwt-secret-with-at-least-32-characters";
+    adminCookie = `${adminSessionCookieName}=${await createAdminSessionToken({
+      adminId: "admin-1",
+      role: "admin",
+      tokenVersion: 0,
+    })}`;
     ordersRoute = unwrapModule(await import("../../src/app/api/orders/route"));
     statusRoute = unwrapModule(await import("../../src/app/api/orders/[id]/status/route"));
   });

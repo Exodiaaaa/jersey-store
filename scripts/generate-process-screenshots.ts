@@ -355,8 +355,8 @@ async function runAdminScreenshots(browserContext: BrowserContext) {
   await preparePage(page);
 
   await page.goto(`${baseUrl}/admin/login`);
-  await page.getByLabel("Email").fill("admin@kvnfootwear.ma");
-  await page.getByLabel("Mot de passe").fill("admin123");
+  await page.getByLabel("Email").fill("admin@example.test");
+  await page.getByLabel("Mot de passe").fill("MotDePasseIllustration2026");
   await screenshot(page, "01-admin-connexion.png");
 
   await setAdminSession(page);

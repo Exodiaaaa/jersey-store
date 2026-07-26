@@ -7,6 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model AdminUser {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  role          String   @default("admin")
+  tokenVersion  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
 model Team {
   id       String    @id
   name     String

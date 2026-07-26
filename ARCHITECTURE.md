@@ -46,6 +46,15 @@ Les types métier sont centralisés dans `src/lib/types.ts` :
 - `Order` : client, lignes de commande, total, statut, message WhatsApp.
 - `OrderStatus` : `new`, `confirmed`, `preparing`, `ready`, `delivered`, `cancelled`.
 
+## Authentification administrateur
+
+- Les comptes administrateur sont stockes dans MySQL ; aucun mot de passe admin n'est lu depuis `.env.production`.
+- Le mot de passe est conserve uniquement sous forme de hash bcrypt.
+- La session est un JWT HS256 de 12 heures stocke dans un cookie `HttpOnly`, `Secure` et `SameSite=Strict`.
+- La cle de signature JWT est montee comme Docker secret depuis `secrets/admin_jwt_secret`.
+- Chaque API privee controle le JWT et la version du compte en base.
+- Un changement de mot de passe incremente cette version, invalide les autres sessions et renouvelle le JWT courant.
+
 ## Flux commande
 
 1. Le client ajoute un article au panier via `CartProvider`.
@@ -76,4 +85,4 @@ Les routes `src/app/api/*` peuvent ensuite être remplacées par une API Symfony
 - `GET/POST/PUT/DELETE /teams`
 - `GET/PUT /sizes`
 
-Le login local doit être remplacé par une vraie session backend avec cookie HTTP-only.
+L'authentification admin utilise une session backend JWT avec cookie HTTP-only.
