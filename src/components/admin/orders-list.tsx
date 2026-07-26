@@ -7,6 +7,7 @@ import { clientApi } from "@/lib/client-api";
 import { canChangeOrderStatus, orderStatusLabels, orderStatuses, orderStatusTones } from "@/lib/status";
 import { formatDate, formatPrice } from "@/lib/format";
 import { Order, OrderStatus } from "@/lib/types";
+import { buildCustomerWhatsAppUrl } from "@/lib/whatsapp";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -78,8 +79,10 @@ export function OrdersList() {
               </Select>
               <div className="flex items-center gap-2 lg:justify-end">
                 <a
+                  aria-label={`Contacter ${order.customer.fullName} sur WhatsApp`}
                   className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-zinc-200 transition hover:bg-white/[0.08]"
-                  href={`https://wa.me/?text=${encodeURIComponent(order.whatsappMessage)}`}
+                  href={buildCustomerWhatsAppUrl(order.whatsappMessage, order.customer.phone)}
+                  rel="noreferrer"
                   target="_blank"
                 >
                   <MessageCircle size={17} />

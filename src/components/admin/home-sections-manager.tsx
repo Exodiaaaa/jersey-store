@@ -3,6 +3,7 @@
 import { DragEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Edit3, GripVertical, Plus, Save, Search, Trash2, X } from "lucide-react";
 import { clientApi } from "@/lib/client-api";
+import { getLowestAvailablePrice } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
 import { HomeSection, HomeSectionInput, Product } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
@@ -376,7 +377,9 @@ export function HomeSectionsManager() {
                     <ProductMedia className="aspect-square rounded-md" images={product.images} name={product.name} />
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-black text-white">{product.name}</span>
-                      <span className="mt-1 block text-xs text-zinc-500">{formatPrice(product.basePrice)}</span>
+                      <span className="mt-1 block text-xs text-zinc-500">
+                        {formatPrice(getLowestAvailablePrice(product))}
+                      </span>
                     </span>
                     <input
                       checked={checked}

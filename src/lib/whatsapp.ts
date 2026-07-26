@@ -42,3 +42,21 @@ export function buildOrderWhatsAppMessage(order: Order) {
 export function buildWhatsAppUrl(message: string) {
   return `https://wa.me/${whatsappPhoneNumber}?text=${encodeURIComponent(message)}`;
 }
+
+export function normalizeWhatsAppPhoneNumber(phone: string) {
+  const digits = phone.replace(/\D/g, "").replace(/^00/, "");
+
+  if (digits.startsWith("0")) {
+    return `212${digits.slice(1)}`;
+  }
+
+  if (/^[5-7]\d{8}$/.test(digits)) {
+    return `212${digits}`;
+  }
+
+  return digits;
+}
+
+export function buildCustomerWhatsAppUrl(message: string, phone: string) {
+  return `https://wa.me/${normalizeWhatsAppPhoneNumber(phone)}?text=${encodeURIComponent(message)}`;
+}

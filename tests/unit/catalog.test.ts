@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import {
   getAvailableProductTypes,
+  getLowestAvailablePrice,
   getProductOriginalPrice,
   getProductPriceInfo,
   getUnitPrice,
@@ -57,5 +58,16 @@ describe("catalog helpers", () => {
       hasPack: true,
       label: "Pack maillot + short uniquement",
     });
+  });
+
+  test("affiche le prix reel le plus bas selon le mode de vente", () => {
+    assert.equal(
+      getLowestAvailablePrice(makeProduct({ basePrice: 249, hasJersey: false, hasPack: true, packPrice: 349 })),
+      349,
+    );
+    assert.equal(
+      getLowestAvailablePrice(makeProduct({ basePrice: 249, hasJersey: true, hasPack: true, packPrice: 349 })),
+      249,
+    );
   });
 });

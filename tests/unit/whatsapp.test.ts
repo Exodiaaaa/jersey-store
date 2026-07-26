@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { buildWhatsAppMessage, buildWhatsAppUrl } from "../../src/lib/whatsapp";
+import {
+  buildCustomerWhatsAppUrl,
+  buildWhatsAppMessage,
+  buildWhatsAppUrl,
+  normalizeWhatsAppPhoneNumber,
+} from "../../src/lib/whatsapp";
 import { makeCartItem, makeCustomer } from "../helpers/fixtures";
 
 describe("whatsapp helpers", () => {
@@ -34,5 +39,15 @@ describe("whatsapp helpers", () => {
     const url = buildWhatsAppUrl("Bonjour KVN Footwear");
 
     assert.equal(url, "https://wa.me/212617311976?text=Bonjour%20KVN%20Footwear");
+  });
+
+  test("normalise les numeros marocains pour contacter le client depuis le back-office", () => {
+    assert.equal(normalizeWhatsAppPhoneNumber("06 00 00 00 00"), "212600000000");
+    assert.equal(normalizeWhatsAppPhoneNumber("+212 617-311976"), "212617311976");
+    assert.equal(normalizeWhatsAppPhoneNumber("00212 617-311976"), "212617311976");
+    assert.equal(
+      buildCustomerWhatsAppUrl("Commande KVN", "0600000000"),
+      "https://wa.me/212600000000?text=Commande%20KVN",
+    );
   });
 });
