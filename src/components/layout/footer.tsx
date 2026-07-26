@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Camera, MessageCircle, MapPin } from "lucide-react";
-import { whatsappPhoneNumber } from "@/data/catalog";
+import { instagramUrl, whatsappPhoneNumber } from "@/data/catalog";
 import { Logo } from "@/components/ui/logo";
 
 export function Footer() {
@@ -43,10 +43,15 @@ export function Footer() {
               <MessageCircle size={17} />
               WhatsApp
             </a>
-            <span className="inline-flex items-center gap-2">
+            <a
+              className="inline-flex items-center gap-2 hover:text-white"
+              href={instagramUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
               <Camera size={17} />
-              Instagram
-            </span>
+              @kvn_wearfoots
+            </a>
             <span className="inline-flex items-center gap-2">
               <MapPin size={17} />
               Livraison au Maroc

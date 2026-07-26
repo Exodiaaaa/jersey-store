@@ -1,5 +1,5 @@
-import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
-import { whatsappPhoneNumber } from "@/data/catalog";
+import { Camera, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { instagramUrl, whatsappPhoneNumber } from "@/data/catalog";
 import { LinkButton } from "@/components/ui/button";
 
 export default function ContactPage() {
@@ -14,15 +14,22 @@ export default function ContactPage() {
           Pour une question de taille, de disponibilite ou de flocage, le vendeur repond directement avant
           validation de la commande.
         </p>
-        <LinkButton className="mt-7" href={`https://wa.me/${whatsappPhoneNumber}`} size="lg">
-          <MessageCircle size={19} />
-          Ouvrir WhatsApp
-        </LinkButton>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <LinkButton href={`https://wa.me/${whatsappPhoneNumber}`} size="lg">
+            <MessageCircle size={19} />
+            Ouvrir WhatsApp
+          </LinkButton>
+          <LinkButton href={instagramUrl} rel="noreferrer" size="lg" target="_blank" variant="secondary">
+            <Camera size={19} />
+            Instagram
+          </LinkButton>
+        </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {[
           [Phone, "Telephone", "+212 617-311976"],
           [MessageCircle, "WhatsApp", "Commande et suivi"],
+          [Camera, "Instagram", "@kvn_wearfoots"],
           [MapPin, "Livraison", "Toutes villes du Maroc"],
           [Mail, "Email", "contact@kvnfootwear.ma"],
         ].map(([Icon, title, value]) => (

@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Search, ShoppingBag, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { logoutAdmin } from "@/lib/admin-auth";
+import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { buttonClassName } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
@@ -20,12 +19,6 @@ export function Header() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const { count } = useCart();
-
-  useEffect(() => {
-    if (!pathname.startsWith("/admin")) {
-      logoutAdmin();
-    }
-  }, [pathname]);
 
   if (pathname.startsWith("/admin")) {
     return null;

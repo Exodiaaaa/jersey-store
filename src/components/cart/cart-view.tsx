@@ -64,6 +64,7 @@ export function CartView() {
                 <div className="flex items-center gap-2">
                   <div className="inline-flex h-10 items-center rounded-lg border border-white/10 bg-zinc-950">
                     <button
+                      aria-label={`Diminuer la quantite de ${item.productName}`}
                       className="grid h-10 w-9 place-items-center"
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       type="button"
@@ -72,6 +73,7 @@ export function CartView() {
                     </button>
                     <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
                     <button
+                      aria-label={`Augmenter la quantite de ${item.productName}`}
                       className="grid h-10 w-9 place-items-center"
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       type="button"
@@ -79,7 +81,13 @@ export function CartView() {
                       <Plus size={15} />
                     </button>
                   </div>
-                  <Button onClick={() => removeItem(item.id)} size="icon" type="button" variant="danger">
+                  <Button
+                    aria-label={`Supprimer ${item.productName} du panier`}
+                    onClick={() => removeItem(item.id)}
+                    size="icon"
+                    type="button"
+                    variant="danger"
+                  >
                     <Trash2 size={16} />
                   </Button>
                 </div>

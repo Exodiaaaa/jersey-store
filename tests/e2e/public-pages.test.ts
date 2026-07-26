@@ -91,12 +91,13 @@ describe("public pages e2e", () => {
     assert.match(html, /Chargement des produits/);
   });
 
-  test("sert la page contact avec le lien WhatsApp", async () => {
+  test("sert la page contact avec les liens WhatsApp et Instagram", async () => {
     const { html, response } = await fetchPage("/contact");
 
     assert.equal(response.status, 200);
     assert.match(html, /Commande rapide sur WhatsApp/);
     assert.match(html, /https:\/\/wa.me\/212617311976/);
+    assert.match(html, /https:\/\/www.instagram.com\/kvn_wearfoots/);
   });
 
   test("sert une page produit dynamique avec l'etat de chargement client", async () => {

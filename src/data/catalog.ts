@@ -1,6 +1,7 @@
 import type { Category, Product, Size, Team } from "@/lib/types";
 
 export const whatsappPhoneNumber = "212617311976";
+export const instagramUrl = "https://www.instagram.com/kvn_wearfoots";
 
 export const sizes: Size[] = ["S", "M", "L", "XL", "XXL", "XXXL"];
 

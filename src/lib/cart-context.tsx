@@ -50,11 +50,23 @@ function createCartItemId(input: AddCartItemInput) {
 }
 
 export function CartProvider({ children }: PropsWithChildren) {
-  const [items, setItems] = useState<CartItem[]>(() => readStorage<CartItem[]>(CART_KEY, []));
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    writeStorage(CART_KEY, items);
-  }, [items]);
+    const frame = window.requestAnimationFrame(() => {
+      setItems(readStorage<CartItem[]>(CART_KEY, []));
+      setIsHydrated(true);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    if (isHydrated) {
+      writeStorage(CART_KEY, items);
+    }
+  }, [isHydrated, items]);
 
   const addItem = useCallback((input: AddCartItemInput) => {
     const hasFlocking = input.flocking.mode !== "none";
