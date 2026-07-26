@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Lock, LogIn, Mail } from "lucide-react";
 import { loginAdmin } from "@/lib/admin-auth";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -8,20 +9,28 @@ import { Input, Label } from "@/components/ui/field";
 import { Logo } from "@/components/ui/logo";
 
 export function AdminLoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    setIsSubmitting(true);
 
-    if (!loginAdmin(email, password)) {
-      setError("Email ou mot de passe incorrect.");
+    const response = await loginAdmin(email, password).catch(() => null);
+    setIsSubmitting(false);
+
+    if (!response?.ok) {
+      const body = (await response?.json().catch(() => null)) as { message?: string } | null;
+      setError(body?.message ?? "Connexion admin impossible. Reessayez.");
       return;
     }
 
-    window.location.assign("/admin/dashboard");
+    router.replace("/admin/dashboard");
+    router.refresh();
   };
 
   return (
@@ -63,9 +72,9 @@ export function AdminLoginForm() {
           </div>
         </div>
         {error && <p className="mt-4 rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-100">{error}</p>}
-        <Button className="mt-6 w-full" size="lg" type="submit">
+        <Button className="mt-6 w-full" disabled={isSubmitting} size="lg" type="submit">
           <LogIn size={19} />
-          Se connecter
+          {isSubmitting ? "Connexion..." : "Se connecter"}
         </Button>
         <LinkButton className="mt-3 w-full" href="/" size="lg" variant="secondary">
           <ArrowLeft size={19} />

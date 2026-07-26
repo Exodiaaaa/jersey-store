@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 import { mapDbOrder } from "@/lib/db-mappers";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   const { id } = await params;
   const order = await prisma.order.findUnique({
     include: {

@@ -5,7 +5,8 @@ import { Edit3, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { clientApi } from "@/lib/client-api";
 import { getAvailableProductTypes, getProductPriceInfo } from "@/lib/catalog";
-import { Category, Product, Team } from "@/lib/types";
+import { getProductSaleModeLabel } from "@/lib/product-sales";
+import { Product, Team } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductMedia } from "@/components/product/product-media";
 import { PriceDisplay } from "@/components/product/price-display";
@@ -15,22 +16,18 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export function ProductsList() {
   const [items, setItems] = useState<Product[]>([]);
-  const [categoryItems, setCategoryItems] = useState<Category[]>([]);
   const [teamItems, setTeamItems] = useState<Team[]>([]);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   useEffect(() => {
-    void Promise.all([clientApi.getProducts(), clientApi.getCategories(), clientApi.getTeams()]).then(
-      ([nextProducts, nextCategories, nextTeams]) => {
+    void Promise.all([clientApi.getProducts(), clientApi.getTeams()]).then(
+      ([nextProducts, nextTeams]) => {
         setItems(nextProducts);
-        setCategoryItems(nextCategories);
         setTeamItems(nextTeams);
       },
     ).catch(() => undefined);
   }, []);
 
-  const getCategoryLabel = (product: Product) =>
-    categoryItems.find((category) => category.id === product.categoryId)?.name ?? product.categoryName ?? product.categoryId;
   const getTeamLabel = (product: Product) =>
     teamItems.find((team) => team.id === product.teamId)?.name ?? product.teamName ?? product.teamId;
 
@@ -73,7 +70,7 @@ export function ProductsList() {
               <ProductMedia className="aspect-square" images={product.images} name={product.name} visual={product.visual} />
               <div className="min-w-0">
                 <div className="flex flex-wrap gap-2">
-                  <Badge tone="silver">{getCategoryLabel(product)}</Badge>
+                  <Badge tone="silver">{getProductSaleModeLabel(product)}</Badge>
                   <Badge tone="blue">{getTeamLabel(product)}</Badge>
                   {product.allowFlocking && <Badge tone="lime">Flocage</Badge>}
                 </div>

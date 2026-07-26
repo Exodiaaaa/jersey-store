@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 import { mapDbHomeSection } from "@/lib/db-mappers";
 import { HomeSectionInput } from "@/lib/types";
@@ -26,6 +27,9 @@ function uniqueProductIds(productIds: string[]) {
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   const { id } = await params;
   const section = (await request.json()) as HomeSectionInput;
   const productIds = uniqueProductIds(section.productIds ?? []);
@@ -62,7 +66,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   return NextResponse.json(mapDbHomeSection(savedSection));
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   const { id } = await params;
   await prisma.homeSection.delete({ where: { id } });
 

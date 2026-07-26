@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 import { mapDbOrder } from "@/lib/db-mappers";
 import { buildWhatsAppMessage } from "@/lib/whatsapp";
@@ -15,7 +16,10 @@ class StockError extends Error {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   const orders = await prisma.order.findMany({
     include: orderInclude,
     orderBy: { createdAt: "desc" },

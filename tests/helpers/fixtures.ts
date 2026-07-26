@@ -89,6 +89,8 @@ export function makeDbProduct(overrides: Record<string, unknown> = {}) {
     packPrice: 349,
     originalBasePrice: 299,
     originalPackPrice: 399,
+    hasJersey: false,
+    hasPack: true,
     flockingPrice: 39,
     description: "Pack blanc avec short assorti.",
     visualPrimary: "#ffffff",

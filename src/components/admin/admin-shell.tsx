@@ -12,9 +12,8 @@ import {
   ShoppingBasket,
   Users,
 } from "lucide-react";
-import { PropsWithChildren, useEffect, useMemo, useSyncExternalStore } from "react";
-import { adminSessionKey, logoutAdmin } from "@/lib/admin-auth";
-import { readStorage } from "@/lib/storage";
+import { PropsWithChildren, useState } from "react";
+import { logoutAdmin } from "@/lib/admin-auth";
 import { buttonClassName } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 
@@ -27,65 +26,26 @@ const adminNav = [
   { href: "/admin/equipes", label: "Equipes", icon: Users },
 ];
 
-const pendingSessionSnapshot = "__admin-session-pending__";
-
-function subscribeToAdminSession(onStoreChange: () => void) {
-  window.addEventListener("storage", onStoreChange);
-  return () => window.removeEventListener("storage", onStoreChange);
-}
-
-function getAdminSessionSnapshot() {
-  return window.localStorage.getItem(adminSessionKey) ?? "";
-}
-
-function getAdminSessionServerSnapshot() {
-  return pendingSessionSnapshot;
-}
-
 export function AdminShell({ children }: PropsWithChildren) {
   const router = useRouter();
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
-  const sessionSnapshot = useSyncExternalStore(
-    subscribeToAdminSession,
-    getAdminSessionSnapshot,
-    getAdminSessionServerSnapshot,
-  );
-  const sessionChecked = sessionSnapshot !== pendingSessionSnapshot;
-  const session = useMemo(() => {
-    if (!sessionChecked || !sessionSnapshot) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(sessionSnapshot) as { email: string };
-    } catch {
-      return readStorage<{ email: string } | null>(adminSessionKey, null);
-    }
-  }, [sessionChecked, sessionSnapshot]);
-
-  useEffect(() => {
-    if (!isLoginPage && sessionChecked && !session) {
-      router.replace("/admin/login");
-    }
-  }, [isLoginPage, router, session, sessionChecked]);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   if (isLoginPage) {
     return <>{children}</>;
   }
 
-  const logout = () => {
-    logoutAdmin();
-    router.replace("/admin/login");
-  };
+  const logout = async () => {
+    setIsLoggingOut(true);
+    const response = await logoutAdmin().catch(() => null);
+    setIsLoggingOut(false);
 
-  if (!sessionChecked || !session) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-zinc-950 px-4 text-center text-sm text-zinc-400">
-        Verification de la session admin...
-      </div>
-    );
-  }
+    if (response?.ok) {
+      router.replace("/admin/login");
+      router.refresh();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -112,9 +72,14 @@ export function AdminShell({ children }: PropsWithChildren) {
             );
           })}
         </nav>
-        <button className={buttonClassName("ghost", "md", "absolute bottom-5 left-5 right-5")} onClick={logout} type="button">
+        <button
+          className={buttonClassName("ghost", "md", "absolute bottom-5 left-5 right-5")}
+          disabled={isLoggingOut}
+          onClick={() => void logout()}
+          type="button"
+        >
           <LogOut size={18} />
-          Deconnexion
+          {isLoggingOut ? "Deconnexion..." : "Deconnexion"}
         </button>
       </aside>
 

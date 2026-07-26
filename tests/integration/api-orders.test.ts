@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { before, beforeEach, describe, test } from "node:test";
+import { adminSessionCookieName, createAdminSessionToken } from "../../src/lib/admin-session";
 
 import { makeCartItem, makeCustomer, makeDbOrder, makeDbOrderItem } from "../helpers/fixtures";
 
@@ -101,6 +102,7 @@ type StatusRouteModule = {
 
 let ordersRoute: OrdersRouteModule;
 let statusRoute: StatusRouteModule;
+let adminCookie = "";
 
 function unwrapModule<T extends object>(module: T | { default: T }) {
   return "default" in module ? module.default : module;
@@ -114,12 +116,27 @@ function jsonRequest(body: unknown) {
   });
 }
 
+function authenticatedJsonRequest(body: unknown) {
+  return new Request("http://localhost/api/orders/order-1/status", {
+    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+      cookie: adminCookie,
+    },
+    method: "PATCH",
+  });
+}
+
 async function responseJson(response: Response) {
   return response.json() as Promise<Record<string, unknown>>;
 }
 
 describe("orders API route handlers", () => {
   before(async () => {
+    process.env.ADMIN_EMAIL = "admin@example.test";
+    process.env.ADMIN_PASSWORD = "test-password";
+    process.env.ADMIN_SESSION_SECRET = "test-session-secret-with-at-least-32-characters";
+    adminCookie = `${adminSessionCookieName}=${createAdminSessionToken()}`;
     ordersRoute = unwrapModule(await import("../../src/app/api/orders/route"));
     statusRoute = unwrapModule(await import("../../src/app/api/orders/[id]/status/route"));
   });
@@ -166,7 +183,7 @@ describe("orders API route handlers", () => {
   });
 
   test("PATCH refuse un statut invalide avant toute ecriture", async () => {
-    const response = await statusRoute.PATCH(jsonRequest({ status: "archived" }), {
+    const response = await statusRoute.PATCH(authenticatedJsonRequest({ status: "archived" }), {
       params: Promise.resolve({ id: "order-1" }),
     });
     const body = await responseJson(response);
@@ -179,7 +196,7 @@ describe("orders API route handlers", () => {
   test("PATCH bloque un retour en arriere", async () => {
     state.currentOrder = makeDbOrder({ status: "preparing" });
 
-    const response = await statusRoute.PATCH(jsonRequest({ status: "confirmed" }), {
+    const response = await statusRoute.PATCH(authenticatedJsonRequest({ status: "confirmed" }), {
       params: Promise.resolve({ id: "order-1" }),
     });
     const body = await responseJson(response);
@@ -197,7 +214,7 @@ describe("orders API route handlers", () => {
       status: "preparing",
     });
 
-    const response = await statusRoute.PATCH(jsonRequest({ status: "cancelled" }), {
+    const response = await statusRoute.PATCH(authenticatedJsonRequest({ status: "cancelled" }), {
       params: Promise.resolve({ id: "order-1" }),
     });
     const body = await responseJson(response);
@@ -208,5 +225,14 @@ describe("orders API route handlers", () => {
     assert.equal(state.stockUpdates.length, 1);
     assert.deepEqual(state.stockUpdates[0].data, { quantity: { increment: 3 } });
     assert.deepEqual(state.stockUpdates[0].where, { productId: "prod-real-home", size: "M" });
+  });
+
+  test("PATCH refuse une requete sans session admin", async () => {
+    const response = await statusRoute.PATCH(jsonRequest({ status: "confirmed" }), {
+      params: Promise.resolve({ id: "order-1" }),
+    });
+
+    assert.equal(response.status, 401);
+    assert.equal(state.updatedStatus, undefined);
   });
 });

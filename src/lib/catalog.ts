@@ -1,4 +1,5 @@
 import { Product, ProductCategoryId, ProductType, Size } from "@/lib/types";
+import { getProductSaleMode } from "@/lib/product-sales";
 
 export type ProductFilters = {
   query?: string;
@@ -42,34 +43,10 @@ export function getProductPriceInfo(product: Product, type: ProductType) {
 }
 
 export function getAvailableProductTypes(product: Product): ProductType[] {
-  const hasConfiguredTypes = product.hasJersey !== undefined || product.hasPack !== undefined;
+  const mode = getProductSaleMode(product);
 
-  if (hasConfiguredTypes) {
-    const types: ProductType[] = [];
-
-    if (product.hasJersey) {
-      types.push("jersey");
-    }
-
-    if (product.hasPack) {
-      types.push("pack");
-    }
-
-    if (types.length === 0) {
-      return ["jersey"];
-    }
-
-    if (product.categoryId === "pack" && types.includes("pack")) {
-      return ["pack", ...types.filter((type) => type !== "pack")];
-    }
-
-    return types;
-  }
-
-  if (product.categoryId === "accessory") {
-    return ["jersey"];
-  }
-
+  if (mode === "jersey") return ["jersey"];
+  if (mode === "pack") return ["pack"];
   return product.categoryId === "pack" ? ["pack", "jersey"] : ["jersey", "pack"];
 }
 

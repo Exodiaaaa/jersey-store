@@ -6,6 +6,7 @@ import {
   getProductPriceInfo,
   getUnitPrice,
 } from "../../src/lib/catalog";
+import { getProductSaleConfiguration, getProductSaleMode } from "../../src/lib/product-sales";
 import { makeProduct } from "../helpers/fixtures";
 
 describe("catalog helpers", () => {
@@ -33,10 +34,10 @@ describe("catalog helpers", () => {
     });
   });
 
-  test("limite les types disponibles selon la categorie", () => {
+  test("utilise une seule option par defaut selon la categorie historique", () => {
     assert.deepEqual(getAvailableProductTypes(makeProduct({ categoryId: "accessory" })), ["jersey"]);
-    assert.deepEqual(getAvailableProductTypes(makeProduct({ categoryId: "pack" })), ["pack", "jersey"]);
-    assert.deepEqual(getAvailableProductTypes(makeProduct({ categoryId: "jersey" })), ["jersey", "pack"]);
+    assert.deepEqual(getAvailableProductTypes(makeProduct({ categoryId: "pack" })), ["pack"]);
+    assert.deepEqual(getAvailableProductTypes(makeProduct({ categoryId: "jersey" })), ["jersey"]);
   });
 
   test("priorise les types reellement vendus quand ils sont configures", () => {
@@ -46,5 +47,15 @@ describe("catalog helpers", () => {
       getAvailableProductTypes(makeProduct({ categoryId: "pack", hasJersey: true, hasPack: true })),
       ["pack", "jersey"],
     );
+  });
+
+  test("derive les drapeaux et la categorie depuis le mode de vente unique", () => {
+    assert.equal(getProductSaleMode(makeProduct({ hasJersey: true, hasPack: true })), "both");
+    assert.deepEqual(getProductSaleConfiguration("pack"), {
+      categoryId: "pack",
+      hasJersey: false,
+      hasPack: true,
+      label: "Pack maillot + short uniquement",
+    });
   });
 });

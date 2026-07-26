@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-session";
 import { sizes as catalogSizes } from "@/data/catalog";
 import { prisma } from "@/lib/prisma";
 import { Size } from "@/lib/types";
@@ -14,6 +15,9 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   const body = (await request.json()) as { sizes: Size[] };
 
   await prisma.$transaction(async (tx) => {

@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 import { mapDbOrder } from "@/lib/db-mappers";
 import { canChangeOrderStatus, orderStatuses } from "@/lib/status";
 import { OrderStatus } from "@/lib/types";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   const { id } = await params;
   const body = (await request.json()) as { status: OrderStatus };
 

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 import { mapDbProduct } from "@/lib/db-mappers";
 import { Product } from "@/lib/types";
+import { getProductSaleConfiguration, getProductSaleMode } from "@/lib/product-sales";
 
 const productInclude = {
   category: true,
@@ -11,17 +13,19 @@ const productInclude = {
 };
 
 function productPayload(product: Product) {
+  const sales = getProductSaleConfiguration(getProductSaleMode(product));
+
   return {
     slug: product.slug,
     name: product.name,
     teamId: product.teamId,
-    categoryId: product.categoryId,
+    categoryId: sales.categoryId,
     basePrice: product.basePrice,
     packPrice: product.packPrice,
     originalBasePrice: product.originalBasePrice ?? null,
     originalPackPrice: product.originalPackPrice ?? null,
-    hasJersey: product.hasJersey ?? true,
-    hasPack: product.hasPack ?? false,
+    hasJersey: sales.hasJersey,
+    hasPack: sales.hasPack,
     flockingPrice: product.flockingPrice,
     description: product.description,
     visualPrimary: product.visual.primary,
@@ -49,6 +53,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   const { id } = await params;
   const product = (await request.json()) as Product;
 
@@ -83,7 +90,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   return NextResponse.json(mapDbProduct(savedProduct));
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   const { id } = await params;
   await prisma.product.delete({ where: { id } });
 

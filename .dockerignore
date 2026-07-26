@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+.env
+.env.*
+npm-debug.log*
+playwright-report
+test-results
+process-screenshots
+*.md
+!README.md

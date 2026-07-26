@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
 import { sizes as defaultSizes } from "@/data/catalog";
 import { clientApi } from "@/lib/client-api";
-import { Category, Product, ProductCategoryId, ProductType, ProductVisual, Size, StockBySize, Team } from "@/lib/types";
+import { getProductSaleConfiguration, getProductSaleMode } from "@/lib/product-sales";
+import { Category, Product, ProductSaleMode, ProductVisual, Size, StockBySize, Team } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductImageUploader } from "@/components/admin/product-image-uploader";
 import { Button, LinkButton } from "@/components/ui/button";
@@ -40,20 +41,13 @@ function optionalPrice(value: string) {
   return price > 0 ? price : undefined;
 }
 
-function resolveProductTypes(product: Product) {
-  return {
-    hasJersey: product.hasJersey ?? true,
-    hasPack: product.hasPack ?? false,
-  };
-}
-
 function createBlankProduct(categoryItems: Category[], teamItems: Team[], sizeItems: Size[]): Product {
   return {
     id: `prod-${Date.now()}`,
     slug: "",
     name: "",
     teamId: teamItems[0]?.id ?? "team",
-    categoryId: categoryItems[0]?.id ?? "jersey",
+    categoryId: categoryItems.find((category) => category.id === "jersey")?.id ?? "jersey",
     basePrice: 249,
     packPrice: 329,
     hasJersey: true,
@@ -82,7 +76,8 @@ export function ProductForm({ productId }: ProductFormProps) {
   const [productToSave, setProductToSave] = useState<Product | null>(null);
 
   const isEditing = Boolean(productId);
-  const { hasJersey, hasPack } = resolveProductTypes(product);
+  const saleMode = getProductSaleMode(product);
+  const { categoryId: saleCategoryId, hasJersey, hasPack } = getProductSaleConfiguration(saleMode);
 
   useEffect(() => {
     void Promise.all([clientApi.getCategories(), clientApi.getTeams(), clientApi.getSizes()]).then(
@@ -94,7 +89,7 @@ export function ProductForm({ productId }: ProductFormProps) {
         if (!productId) {
           setProduct((current) => ({
             ...current,
-            categoryId: nextCategories[0]?.id ?? current.categoryId,
+            categoryId: nextCategories.some((category) => category.id === "jersey") ? "jersey" : current.categoryId,
             sizes: availableSizes,
             teamId: nextTeams[0]?.id ?? current.teamId,
           }));
@@ -124,22 +119,17 @@ export function ProductForm({ productId }: ProductFormProps) {
     setProduct((current) => ({ ...current, [key]: value }));
   };
 
-  const updateProductTypeAvailability = (type: ProductType, isAvailable: boolean) => {
+  const updateSaleMode = (mode: ProductSaleMode) => {
+    const sales = getProductSaleConfiguration(mode);
+
     setProduct((current) => {
-      const currentTypes = resolveProductTypes(current);
-      const nextHasJersey = type === "jersey" ? isAvailable : currentTypes.hasJersey;
-      const nextHasPack = type === "pack" ? isAvailable : currentTypes.hasPack;
-
-      if (!nextHasJersey && !nextHasPack) {
-        return current;
-      }
-
       return {
         ...current,
-        hasJersey: nextHasJersey,
-        hasPack: nextHasPack,
-        basePrice: nextHasJersey && current.basePrice <= 0 ? 249 : current.basePrice,
-        packPrice: nextHasPack && current.packPrice <= 0 ? 329 : current.packPrice,
+        categoryId: sales.categoryId,
+        hasJersey: sales.hasJersey,
+        hasPack: sales.hasPack,
+        basePrice: sales.hasJersey && current.basePrice <= 0 ? 249 : current.basePrice,
+        packPrice: sales.hasPack && current.packPrice <= 0 ? 329 : current.packPrice,
       };
     });
   };
@@ -183,8 +173,8 @@ export function ProductForm({ productId }: ProductFormProps) {
       return;
     }
 
-    if (!hasJersey && !hasPack) {
-      setFormError("Choisissez au moins un type vendu : maillot seul ou pack maillot + short.");
+    if (!categoryItems.some((category) => category.id === saleCategoryId)) {
+      setFormError(`La categorie systeme "${saleCategoryId}" est manquante. Relancez le seed de la base.`);
       return;
     }
 
@@ -210,6 +200,7 @@ export function ProductForm({ productId }: ProductFormProps) {
 
     const cleanProduct = {
       ...product,
+      categoryId: saleCategoryId,
       hasJersey,
       hasPack,
       originalBasePrice: hasJersey ? product.originalBasePrice : undefined,
@@ -231,6 +222,8 @@ export function ProductForm({ productId }: ProductFormProps) {
         await clientApi.createProduct(productToSave);
       }
       router.push("/admin/produits");
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Impossible d'enregistrer le produit.");
     } finally {
       setIsSaving(false);
       setProductToSave(null);
@@ -279,20 +272,18 @@ export function ProductForm({ productId }: ProductFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Categorie catalogue</Label>
+            <Label htmlFor="sale-mode">Mode de vente</Label>
             <Select
-              id="category"
-              onChange={(event) => updateProduct("categoryId", event.target.value as ProductCategoryId)}
-              value={product.categoryId}
+              id="sale-mode"
+              onChange={(event) => updateSaleMode(event.target.value as ProductSaleMode)}
+              value={saleMode}
             >
-              {categoryItems.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
+              <option value="jersey">Maillot seul</option>
+              <option value="pack">Pack maillot + short uniquement</option>
+              <option value="both">Maillot seul ou pack</option>
             </Select>
             <p className="text-xs leading-5 text-zinc-500">
-              La categorie sert a organiser le catalogue. Le type vendu se choisit dans la section suivante.
+              La categorie Maillot ou Pack est attribuee automatiquement pour eviter toute contradiction.
             </p>
           </div>
         </div>
@@ -308,37 +299,6 @@ export function ProductForm({ productId }: ProductFormProps) {
         </div>
 
         <div className="grid gap-4">
-          <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h2 className="text-sm font-black uppercase text-white">Options vendues</h2>
-                <p className="mt-1 text-xs leading-5 text-zinc-500">
-                  Cochez seulement ce que le client peut commander pour ce produit.
-                </p>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <label className="flex items-center gap-3 rounded-lg border border-white/10 bg-zinc-950/60 p-3 text-sm font-semibold text-zinc-200">
-                  <input
-                    checked={hasJersey}
-                    className="h-4 w-4 accent-amber-300"
-                    onChange={(event) => updateProductTypeAvailability("jersey", event.target.checked)}
-                    type="checkbox"
-                  />
-                  Maillot seul
-                </label>
-                <label className="flex items-center gap-3 rounded-lg border border-white/10 bg-zinc-950/60 p-3 text-sm font-semibold text-zinc-200">
-                  <input
-                    checked={hasPack}
-                    className="h-4 w-4 accent-amber-300"
-                    onChange={(event) => updateProductTypeAvailability("pack", event.target.checked)}
-                    type="checkbox"
-                  />
-                  Maillot + short
-                </label>
-              </div>
-            </div>
-          </div>
-
           <div className="grid gap-4 sm:grid-cols-2">
             {hasJersey && (
               <div className="rounded-lg border border-white/10 bg-zinc-950/50 p-4">

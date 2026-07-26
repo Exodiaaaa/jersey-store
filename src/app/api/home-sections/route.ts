@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 import { mapDbHomeSection } from "@/lib/db-mappers";
 import { HomeSectionInput } from "@/lib/types";
@@ -52,6 +53,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const authError = requireAdmin(request);
+  if (authError) return authError;
+
   const section = (await request.json()) as HomeSectionInput;
   const productIds = uniqueProductIds(section.productIds ?? []);
   const id = section.id || (await createSectionId(section.title));

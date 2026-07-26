@@ -1,5 +1,7 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+Deployment VPS, variables de production et sauvegardes MySQL quotidiennes : voir [`DEPLOY_VPS.md`](./DEPLOY_VPS.md).
+
 ## Getting Started
 
 First, run the development server:

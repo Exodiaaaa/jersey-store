@@ -2,6 +2,8 @@ export type ProductCategoryId = string;
 
 export type ProductType = "jersey" | "pack";
 
+export type ProductSaleMode = "jersey" | "pack" | "both";
+
 export type Size = "S" | "M" | "L" | "XL" | "XXL" | "XXXL";
 
 export type OrderStatus =

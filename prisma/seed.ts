@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { categories, products, sizes, teams } from "../src/data/catalog";
+import { getProductSaleConfiguration, getProductSaleMode } from "../src/lib/product-sales";
 
 const prisma = new PrismaClient();
 
@@ -67,7 +68,7 @@ async function main() {
   for (const category of categories) {
     await prisma.category.upsert({
       create: category,
-      update: category,
+      update: {},
       where: { id: category.id },
     });
   }
@@ -75,7 +76,7 @@ async function main() {
   for (const team of teams) {
     await prisma.team.upsert({
       create: team,
-      update: team,
+      update: {},
       where: { id: team.id },
     });
   }
@@ -88,34 +89,31 @@ async function main() {
     });
   }
 
-  await prisma.product.deleteMany({
-    where: {
-      id: {
-        notIn: products.map((product) => product.id),
-      },
-    },
-  });
-
-  await prisma.team.deleteMany({
-    where: {
-      id: {
-        notIn: teams.map((team) => team.id),
-      },
-    },
-  });
-
   for (const product of products) {
-    await prisma.product.upsert({
-      create: {
+    const existingProduct = await prisma.product.findUnique({
+      select: { id: true },
+      where: { id: product.id },
+    });
+
+    if (existingProduct) {
+      continue;
+    }
+
+    const sales = getProductSaleConfiguration(getProductSaleMode(product));
+
+    await prisma.product.create({
+      data: {
         id: product.id,
         slug: product.slug,
         name: product.name,
         teamId: product.teamId,
-        categoryId: product.categoryId,
+        categoryId: sales.categoryId,
         basePrice: product.basePrice,
         packPrice: product.packPrice,
         originalBasePrice: product.originalBasePrice ?? null,
         originalPackPrice: product.originalPackPrice ?? null,
+        hasJersey: sales.hasJersey,
+        hasPack: sales.hasPack,
         flockingPrice: product.flockingPrice,
         description: product.description,
         visualPrimary: product.visual.primary,
@@ -127,29 +125,8 @@ async function main() {
         allowFlocking: product.allowFlocking,
         createdAt: new Date(product.createdAt),
       },
-      update: {
-        slug: product.slug,
-        name: product.name,
-        teamId: product.teamId,
-        categoryId: product.categoryId,
-        basePrice: product.basePrice,
-        packPrice: product.packPrice,
-        originalBasePrice: product.originalBasePrice ?? null,
-        originalPackPrice: product.originalPackPrice ?? null,
-        flockingPrice: product.flockingPrice,
-        description: product.description,
-        visualPrimary: product.visual.primary,
-        visualSecondary: product.visual.secondary,
-        visualTrim: product.visual.trim,
-        visualPattern: product.visual.pattern,
-        isNew: product.isNew,
-        isPopular: product.isPopular,
-        allowFlocking: product.allowFlocking,
-      },
-      where: { id: product.id },
     });
 
-    await prisma.productImage.deleteMany({ where: { productId: product.id } });
     if (product.images.length > 0) {
       await prisma.productImage.createMany({
         data: product.images.map((url, index) => ({
@@ -160,7 +137,6 @@ async function main() {
       });
     }
 
-    await prisma.productStock.deleteMany({ where: { productId: product.id } });
     await prisma.productStock.createMany({
       data: product.sizes.map((size) => ({
         productId: product.id,
@@ -185,24 +161,25 @@ async function main() {
   }
 
   for (const section of defaultHomeSections) {
-    await prisma.homeSection.upsert({
-      create: {
+    const existingSection = await prisma.homeSection.findUnique({
+      select: { id: true },
+      where: { id: section.id },
+    });
+
+    if (existingSection) {
+      continue;
+    }
+
+    await prisma.homeSection.create({
+      data: {
         id: section.id,
         isActive: section.isActive,
         sortOrder: section.sortOrder,
         subtitle: section.subtitle,
         title: section.title,
       },
-      update: {
-        isActive: section.isActive,
-        sortOrder: section.sortOrder,
-        subtitle: section.subtitle,
-        title: section.title,
-      },
-      where: { id: section.id },
     });
 
-    await prisma.homeSectionProduct.deleteMany({ where: { sectionId: section.id } });
     if (section.productIds.length > 0) {
       await prisma.homeSectionProduct.createMany({
         data: section.productIds.map((productId, index) => ({

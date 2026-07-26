@@ -1,0 +1,11 @@
+[Unit]
+Description=Sauvegarde quotidienne MySQL de KVN Footwear
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=15m
+Unit=kvn-footwear-backup.service
+
+[Install]
+WantedBy=timers.target
