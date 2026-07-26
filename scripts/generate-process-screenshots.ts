@@ -174,7 +174,7 @@ async function startServer() {
     await waitForServer();
   } catch (error) {
     server.kill();
-    throw new Error(`${error instanceof Error ? error.message : String(error)}\n${output}`);
+    throw new Error(`${error instanceof Error ? error.message : String(error)}\n${output}`, { cause: error });
   }
 
   return server;

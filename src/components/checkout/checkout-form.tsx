@@ -1,16 +1,15 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { MessageCircle, Send } from "lucide-react";
 import { clientApi } from "@/lib/client-api";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/format";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/field";
 
 export function CheckoutForm() {
-  const router = useRouter();
   const { items, total, clearCart } = useCart();
   const hasFlockingAdvance = items.some((item) => item.flocking.mode !== "none");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,8 +29,9 @@ export function CheckoutForm() {
     setSubmitError("");
     try {
       const order = await clientApi.createOrder(items, customer);
+      const whatsappUrl = buildWhatsAppUrl(order.whatsappMessage);
       clearCart();
-      router.push(`/confirmation?id=${order.id}`);
+      window.location.assign(whatsappUrl);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Impossible de valider la commande.");
     } finally {
