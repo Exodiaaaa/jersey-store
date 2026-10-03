@@ -1,130 +1,170 @@
-# Deploiement VPS - KVN Footwear
+# Deploiement professionnel - KVN Footwear
 
-Le projet est installe dans `/var/www/kvn-footwear` et publie localement par Docker sur `127.0.0.1:3000`. Nginx gere le domaine et HTTPS.
+La production ne clone pas le depot prive. GitHub Actions valide le projet, construit une image Docker immuable, la publie dans le registre prive GHCR puis deploie cette image sur le VPS par SSH.
 
-## 1. Variables de production et secret JWT
+## Architecture
 
-Ne jamais commiter `.env.production`. Les identifiants admin sont stockes dans MySQL avec un hash bcrypt et ne figurent plus dans ce fichier.
+```text
+push main
+  -> lint + TypeScript + tests
+  -> build Docker linux/amd64
+  -> ghcr.io/exodiaaaa/jersey-store:<commit>
+  -> sauvegarde MySQL
+  -> deploiement SSH
+  -> controle de sante
+  -> rollback automatique de l'image en cas d'echec
+```
+
+Le VPS conserve uniquement :
+
+- `/var/www/kvn-footwear/docker-compose.deploy.yml` ;
+- `/var/www/kvn-footwear/.env.production` ;
+- `/var/www/kvn-footwear/.release.env` ;
+- `/var/www/kvn-footwear/secrets/admin_jwt_secret` ;
+- les scripts d'exploitation dans `/var/www/kvn-footwear/deploy` ;
+- les volumes Docker MySQL et les sauvegardes dans `/var/backups/kvn-footwear`.
+
+Il ne conserve ni depot Git, ni cle GitHub donnant acces au code, ni token GHCR permanent.
+
+## 1. Bootstrap du VPS
+
+Depuis le PC, creer l'archive bootstrap depuis le depot :
+
+```powershell
+tar -czf "$env:TEMP\kvn-footwear-bootstrap.tar.gz" `
+  docker-compose.deploy.yml `
+  deploy/bootstrap-vps.sh `
+  deploy/backup-db.sh `
+  deploy/install-backup-timer.sh `
+  deploy/kvn-footwear-backup.service `
+  deploy/kvn-footwear-backup.timer `
+  deploy/nginx-kvn-footwear.conf `
+  deploy/remote-deploy.sh
+
+scp "$env:TEMP\kvn-footwear-bootstrap.tar.gz" ubuntu@VPS_IP:/tmp/
+```
+
+Sur le VPS :
+
+```bash
+install -d -m 700 /tmp/kvn-bootstrap
+tar -xzf /tmp/kvn-footwear-bootstrap.tar.gz -C /tmp/kvn-bootstrap
+sudo bash /tmp/kvn-bootstrap/deploy/bootstrap-vps.sh
+```
+
+Le bootstrap installe Docker, Compose, Nginx, Certbot et le pare-feu. Les mots de passe MySQL et le secret JWT sont generes directement sur le VPS et ne sont jamais envoyes a GitHub.
+
+## 2. Cle SSH reservee a GitHub Actions
+
+Creer une cle dediee sur le PC. Ne pas reutiliser la cle personnelle :
+
+```powershell
+ssh-keygen -t ed25519 -C "github-actions-kvn-footwear" -f "$env:TEMP\kvn_github_actions"
+```
+
+Laisser la passphrase vide. Ajouter le contenu de `kvn_github_actions.pub` dans `/home/ubuntu/.ssh/authorized_keys` sur le VPS :
+
+```bash
+install -d -o ubuntu -g ubuntu -m 700 /home/ubuntu/.ssh
+nano /home/ubuntu/.ssh/authorized_keys
+chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+chmod 600 /home/ubuntu/.ssh/authorized_keys
+```
+
+Le compte `ubuntu` doit pouvoir utiliser `sudo` sans interaction, comme dans l'installation OVH par defaut.
+
+## 3. Environnement GitHub `production`
+
+Dans **Settings > Environments > New environment**, creer `production`, puis ajouter :
+
+Variables :
+
+```text
+VPS_HOST=141.94.222.188
+VPS_USER=ubuntu
+```
+
+Secrets :
+
+```text
+VPS_SSH_PRIVATE_KEY  contenu complet de kvn_github_actions
+VPS_KNOWN_HOSTS      cle hote publique lue directement sur le VPS
+```
+
+La valeur fiable de `VPS_KNOWN_HOSTS` se genere sur le VPS avec :
+
+```bash
+awk '{print "141.94.222.188 "$1" "$2}' /etc/ssh/ssh_host_ed25519_key.pub
+```
+
+Le `GITHUB_TOKEN` temporaire fourni automatiquement par GitHub Actions publie et telecharge l'image privee. Le workflow effectue `docker logout` apres chaque deploiement : aucun token GHCR longue duree n'est conserve sur le VPS.
+
+## 4. Premier deploiement
+
+Pousser sur `main` ou lancer manuellement **Actions > Production > Run workflow**. La configuration se trouve dans `.github/workflows/production.yml`.
+
+Apres le premier deploiement, initialiser les donnees et creer l'administrateur :
 
 ```bash
 cd /var/www/kvn-footwear
-nano .env.production
+
+docker compose \
+  -f docker-compose.deploy.yml \
+  --env-file .env.production \
+  --env-file .release.env \
+  exec app npm run db:seed
+
+docker compose \
+  -f docker-compose.deploy.yml \
+  --env-file .env.production \
+  --env-file .release.env \
+  exec app npm run admin:create -- --email admin@kvnfootwear.ma
 ```
 
-Verifier que ces variables existent avec de vraies valeurs fortes :
+Le mot de passe admin est saisi de maniere interactive, n'est pas affiche et est stocke uniquement sous forme de hash bcrypt dans MySQL.
 
-```dotenv
-MYSQL_DATABASE=kvn_footwear
-MYSQL_USER=kvn_user
-MYSQL_PASSWORD=mot_de_passe_mysql_fort
-MYSQL_ROOT_PASSWORD=mot_de_passe_root_mysql_fort
-DATABASE_URL=mysql://kvn_user:mot_de_passe_mysql_fort@mysql:3306/kvn_footwear
+## 5. DNS et HTTPS
 
-BACKUP_RETENTION_DAYS=14
+Configurer chez le fournisseur DNS :
+
+```text
+A  @    141.94.222.188
+A  www  141.94.222.188
 ```
 
-Si le mot de passe MySQL contient des caracteres reserves dans une URL (`@`, `:`, `/`, `#`, `%`), les encoder dans `DATABASE_URL`.
-
-Le JWT admin est signe avec un Docker secret, jamais avec une variable de `.env.production` :
+Une fois la propagation confirmee :
 
 ```bash
-cd /var/www/kvn-footwear
-install -d -m 700 secrets
-umask 077
-openssl rand -hex 32 > secrets/admin_jwt_secret
+certbot --nginx \
+  -d kvnfootwear.ma \
+  -d www.kvnfootwear.ma \
+  --redirect
 ```
 
-## 2. Mettre a jour et lancer
+## 6. Sauvegardes
 
-```bash
-cd /var/www/kvn-footwear
-git pull --ff-only
-docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
-docker compose -f docker-compose.prod.yml --env-file .env.production ps
-curl -I http://127.0.0.1:3000
-```
-
-Apres la premiere migration vers l'authentification en base, creer le premier administrateur. Le mot de passe est saisi sans s'afficher et n'est ni enregistre dans l'historique du shell ni conserve dans `.env.production` :
-
-```bash
-docker compose -f docker-compose.prod.yml --env-file .env.production exec app npm run admin:create -- --email admin@kvnfootwear.ma
-```
-
-Supprimer ensuite les anciennes lignes `ADMIN_EMAIL`, `ADMIN_PASSWORD` et `ADMIN_SESSION_SECRET` de `.env.production` si elles sont encore presentes. Le mot de passe peut ensuite etre modifie directement depuis le back-office.
-
-Les migrations Prisma sont appliquees automatiquement au demarrage de l'application. Le seed reste une operation manuelle et n'ajoute que les donnees initiales manquantes :
-
-```bash
-docker compose -f docker-compose.prod.yml --env-file .env.production exec app npm run db:seed
-```
-
-## 3. Installer la sauvegarde toutes les 24 heures
-
-Le timer systemd lance un dump MySQL compresse une fois par jour, verifie l'archive et conserve 14 jours par defaut.
-
-```bash
-cd /var/www/kvn-footwear
-chmod 0750 deploy/backup-db.sh deploy/install-backup-timer.sh
-./deploy/install-backup-timer.sh
-```
-
-Verifier le timer et les sauvegardes :
+Le premier deploiement active automatiquement `kvn-footwear-backup.timer`. Le timer cree chaque jour un dump MySQL compresse et verifie, conserve 14 jours par defaut.
 
 ```bash
 systemctl list-timers kvn-footwear-backup.timer
-journalctl -u kvn-footwear-backup.service --since today --no-pager
-ls -lh /var/backups/kvn-footwear
-gzip -t /var/backups/kvn-footwear/kvn_footwear_*.sql.gz
-```
-
-Lancer une sauvegarde immediate :
-
-```bash
 systemctl start kvn-footwear-backup.service
 systemctl status kvn-footwear-backup.service --no-pager
+ls -lh /var/backups/kvn-footwear
 ```
 
-## 4. Restaurer une sauvegarde
-
-La restauration remplace les tables actuelles. Faire d'abord une nouvelle sauvegarde et choisir explicitement le fichier a restaurer.
+## 7. Verification et rollback
 
 ```bash
 cd /var/www/kvn-footwear
-BACKUP_FILE=/var/backups/kvn-footwear/kvn_footwear_YYYY-MM-DDTHH-MM-SSZ.sql.gz
-gunzip -c "$BACKUP_FILE" | docker compose -f docker-compose.prod.yml --env-file .env.production exec -T mysql sh -ceu 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysql --host=127.0.0.1 --user="$MYSQL_USER" "$MYSQL_DATABASE"'
-```
 
-## 5. Reinitialiser completement la base
+docker compose \
+  -f docker-compose.deploy.yml \
+  --env-file .env.production \
+  --env-file .release.env \
+  ps
 
-Cette operation supprime toutes les commandes, produits et configurations, puis reapplique les migrations, le seed et recree le compte administrateur. Une sauvegarde verifiee est obligatoire et automatique avant la suppression.
-
-Verifier d'abord les etapes sans modifier la base :
-
-```bash
-cd /var/www/kvn-footwear
-chmod 0750 deploy/reset-db.sh
-./deploy/reset-db.sh \
-  --admin-email admin@kvnfootwear.ma \
-  --confirm RESET-KVN-FOOTWEAR \
-  --dry-run
-```
-
-Executer reellement le reset uniquement lorsque la perte des donnees courantes est voulue :
-
-```bash
-./deploy/reset-db.sh \
-  --admin-email admin@kvnfootwear.ma \
-  --confirm RESET-KVN-FOOTWEAR
-```
-
-Le nouveau mot de passe admin est demande sans s'afficher. Si une etape echoue apres la suppression, l'application reste arretee afin de ne pas servir une base incomplete.
-
-## 6. Verification apres deploiement
-
-```bash
+curl -I http://127.0.0.1:3000
 curl -I https://kvnfootwear.ma
-curl -I https://kvnfootwear.ma/admin/dashboard
-docker compose -f docker-compose.prod.yml --env-file .env.production logs --tail=100 app
 ```
 
-Sans cookie admin valide, `/admin/dashboard` doit rediriger vers `/admin/login` et les API privees doivent repondre `401`.
+Chaque image est marquee par le SHA Git complet. Si le nouveau conteneur ne repond pas, `deploy/remote-deploy.sh` remet automatiquement la reference d'image precedente et redemarre l'application. La sauvegarde MySQL creee avant chaque mise a jour permet une restauration manuelle si une migration de base doit etre annulee.

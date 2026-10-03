@@ -6,6 +6,7 @@ umask 077
 app_dir="${KVN_APP_DIR:-/var/www/kvn-footwear}"
 env_file="${KVN_ENV_FILE:-${app_dir}/.env.production}"
 compose_file="${KVN_COMPOSE_FILE:-${app_dir}/docker-compose.prod.yml}"
+release_env_file="${KVN_RELEASE_ENV_FILE:-${app_dir}/.release.env}"
 backup_dir="${KVN_BACKUP_DIR:-/var/backups/kvn-footwear}"
 retention_days="${BACKUP_RETENTION_DAYS:-14}"
 
@@ -41,7 +42,12 @@ cleanup() {
 trap cleanup EXIT
 
 cd "$app_dir"
-docker compose -f "$compose_file" --env-file "$env_file" exec -T mysql sh -ceu '
+compose_args=(-f "$compose_file" --env-file "$env_file")
+if [[ -r "$release_env_file" ]]; then
+  compose_args+=(--env-file "$release_env_file")
+fi
+
+docker compose "${compose_args[@]}" exec -T mysql sh -ceu '
   MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump \
     --host=127.0.0.1 \
     --user="$MYSQL_USER" \

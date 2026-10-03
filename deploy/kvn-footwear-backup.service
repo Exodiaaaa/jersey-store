@@ -2,12 +2,14 @@
 Description=Sauvegarde MySQL de KVN Footwear
 Requires=docker.service
 After=docker.service network-online.target
-ConditionPathExists=/var/www/kvn-footwear/docker-compose.prod.yml
+ConditionPathExists=/var/www/kvn-footwear/docker-compose.deploy.yml
 
 [Service]
 Type=oneshot
 WorkingDirectory=/var/www/kvn-footwear
 EnvironmentFile=-/var/www/kvn-footwear/.env.production
+Environment=KVN_COMPOSE_FILE=/var/www/kvn-footwear/docker-compose.deploy.yml
+Environment=KVN_RELEASE_ENV_FILE=/var/www/kvn-footwear/.release.env
 ExecStart=/var/www/kvn-footwear/deploy/backup-db.sh
 Nice=10
 IOSchedulingClass=best-effort
