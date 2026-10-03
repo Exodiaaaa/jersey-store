@@ -18,5 +18,15 @@ install -m 0644 "${app_dir}/deploy/kvn-footwear-backup.timer" /etc/systemd/syste
 systemctl daemon-reload
 systemctl enable --now kvn-footwear-backup.timer
 systemctl start kvn-footwear-backup.service
-systemctl --no-pager --full status kvn-footwear-backup.service
+
+if systemctl is-failed --quiet kvn-footwear-backup.service; then
+  systemctl --no-pager --full status kvn-footwear-backup.service || true
+  exit 1
+fi
+
+systemctl show \
+  --property=ActiveState \
+  --property=SubState \
+  --property=Result \
+  kvn-footwear-backup.service
 systemctl --no-pager list-timers kvn-footwear-backup.timer
