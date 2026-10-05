@@ -88,6 +88,8 @@ describe("public pages e2e", () => {
     assert.equal(response.status, 200);
     assert.match(html, /KVN Footwear/);
     assert.match(html, /Shop now/);
+    assert.match(html, /Logo KVN Footwear/);
+    assert.match(html, /rel="icon"[^>]+href="\/icon\.jpeg/);
   });
 
   test("sert le catalogue public", async () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -88,7 +89,16 @@ export function SiteEffects() {
 
   return (
     <div className="kvn-loader" aria-label="Chargement de la boutique" role="status">
-      <div className="kvn-loader-mark">KVN</div>
+      <div className="kvn-loader-mark">
+        <Image
+          alt="Logo KVN Footwear"
+          className="object-cover"
+          fill
+          priority
+          sizes="112px"
+          src="/brand-logo.jpeg"
+        />
+      </div>
       <p>Chargement...</p>
     </div>
   );

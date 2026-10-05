@@ -105,14 +105,10 @@ option {
 .kvn-loader-mark {
   animation: kvn-loader-pulse 740ms ease-in-out infinite alternate;
   border: 1px solid rgba(217, 221, 226, 0.42);
-  color: #f5f7f9;
-  display: grid;
-  font-size: 2.5rem;
-  font-weight: 900;
   height: 7rem;
-  letter-spacing: 0;
-  place-items: center;
-  text-transform: uppercase;
+  overflow: hidden;
+  position: relative;
+  border-radius: 1.25rem;
   width: 7rem;
 }
 
