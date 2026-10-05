@@ -4,6 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { mapDbProduct } from "@/lib/db-mappers";
 import { Product } from "@/lib/types";
 import { getProductSaleConfiguration, getProductSaleMode } from "@/lib/product-sales";
+import {
+  jsonByteLength,
+  MAX_PRODUCT_REQUEST_BYTES,
+  validateProductImages,
+  validateProductRequestSize,
+} from "@/lib/product-images";
 
 const productInclude = {
   category: true,
@@ -52,7 +58,29 @@ export async function POST(request: Request) {
   const authError = await requireAdmin(request);
   if (authError) return authError;
 
-  const product = (await request.json()) as Product;
+  const requestSizeError = validateProductRequestSize(request);
+  if (requestSizeError) {
+    return NextResponse.json({ message: requestSizeError.message }, { status: requestSizeError.status });
+  }
+
+  let product: Product;
+  try {
+    product = (await request.json()) as Product;
+  } catch {
+    return NextResponse.json({ message: "Le produit envoye est invalide." }, { status: 400 });
+  }
+
+  if (jsonByteLength(product) > MAX_PRODUCT_REQUEST_BYTES) {
+    return NextResponse.json(
+      { message: "Les photos sont trop volumineuses. Reduisez leur taille ou leur nombre puis reessayez." },
+      { status: 413 },
+    );
+  }
+
+  const imageValidation = validateProductImages(product.images);
+  if (!imageValidation.ok) {
+    return NextResponse.json({ message: imageValidation.message }, { status: imageValidation.status });
+  }
 
   const savedProduct = await prisma.$transaction(async (tx) => {
     await tx.product.create({

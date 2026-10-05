@@ -27,7 +27,11 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
-    throw new Error(errorBody?.message ?? `API error ${response.status} on ${url}`);
+    const fallbackMessage =
+      response.status === 413
+        ? "Les photos sont trop volumineuses. Reduisez leur taille ou leur nombre puis reessayez."
+        : `API error ${response.status} on ${url}`;
+    throw new Error(errorBody?.message ?? fallbackMessage);
   }
 
   return response.json() as Promise<T>;

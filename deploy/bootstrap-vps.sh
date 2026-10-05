@@ -15,6 +15,7 @@ fail() {
 (( EUID == 0 )) || fail "Ce script doit etre lance avec root ou sudo."
 [[ -r "${bundle_dir}/docker-compose.deploy.yml" ]] || fail "docker-compose.deploy.yml est absent du paquet bootstrap."
 [[ -r "${script_dir}/nginx-kvn-footwear.conf" ]] || fail "La configuration Nginx est absente du paquet bootstrap."
+[[ -r "${script_dir}/nginx-product-uploads.conf" ]] || fail "La configuration des uploads Nginx est absente du paquet bootstrap."
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
@@ -59,6 +60,8 @@ fi
 if [[ ! -e /etc/nginx/sites-available/kvn-footwear ]]; then
   install -m 644 "${script_dir}/nginx-kvn-footwear.conf" /etc/nginx/sites-available/kvn-footwear
 fi
+install -d -m 755 /etc/nginx/snippets
+install -m 644 "${script_dir}/nginx-product-uploads.conf" /etc/nginx/snippets/kvn-footwear-product-uploads.conf
 
 ln -sfn /etc/nginx/sites-available/kvn-footwear /etc/nginx/sites-enabled/kvn-footwear
 rm -f /etc/nginx/sites-enabled/default

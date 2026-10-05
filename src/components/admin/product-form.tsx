@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
 import { sizes as defaultSizes } from "@/data/catalog";
 import { clientApi } from "@/lib/client-api";
+import { jsonByteLength, MAX_PRODUCT_REQUEST_BYTES, validateProductImages } from "@/lib/product-images";
 import { getProductSaleConfiguration, getProductSaleMode } from "@/lib/product-sales";
 import { Category, Product, ProductSaleMode, ProductVisual, Size, StockBySize, Team } from "@/lib/types";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
@@ -207,6 +208,17 @@ export function ProductForm({ productId }: ProductFormProps) {
       originalPackPrice: hasPack ? product.originalPackPrice : undefined,
       slug: product.slug || slugify(product.name),
     };
+
+    const imageValidation = validateProductImages(cleanProduct.images);
+    if (!imageValidation.ok) {
+      setFormError(imageValidation.message);
+      return;
+    }
+
+    if (jsonByteLength(cleanProduct) > MAX_PRODUCT_REQUEST_BYTES) {
+      setFormError("Les photos sont trop volumineuses. Reduisez leur nombre puis reessayez.");
+      return;
+    }
 
     setProductToSave(cleanProduct);
   };

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import path from "node:path";
 import { after, before, describe, test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
@@ -72,7 +72,14 @@ describe("public pages e2e", () => {
   });
 
   after(() => {
-    server?.kill();
+    if (!server?.pid) return;
+
+    if (process.platform === "win32") {
+      spawnSync("taskkill", ["/pid", String(server.pid), "/T", "/F"], { stdio: "ignore" });
+      return;
+    }
+
+    server.kill("SIGTERM");
   });
 
   test("sert la page d'accueil avec la marque et les appels a l'action", async () => {

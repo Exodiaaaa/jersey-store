@@ -5,38 +5,45 @@ import { ImagePlus, Trash2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Label } from "@/components/ui/field";
+import { optimizeProductImage } from "@/lib/product-image-optimizer";
+import { MAX_PRODUCT_IMAGES } from "@/lib/product-images";
 
 type ProductImageUploaderProps = {
   images: string[];
   onChange: (images: string[]) => void;
 };
 
-function readFile(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 export function ProductImageUploader({ images, onChange }: ProductImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isReading, setIsReading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [pendingImages, setPendingImages] = useState<string[]>([]);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
   const appendFiles = async (files: FileList | File[]) => {
-    const selectedFiles = Array.from(files)
-      .filter((file) => ["image/jpeg", "image/png", "image/webp"].includes(file.type))
-      .slice(0, Math.max(0, 8 - images.length));
+    setUploadError("");
+    const availableSlots = Math.max(0, MAX_PRODUCT_IMAGES - images.length);
+    const submittedFiles = Array.from(files);
+    const selectedFiles = submittedFiles.slice(0, availableSlots);
 
-    if (selectedFiles.length === 0) return;
+    if (availableSlots === 0) {
+      setUploadError(`Vous avez deja atteint la limite de ${MAX_PRODUCT_IMAGES} photos.`);
+      return;
+    }
+
+    if (submittedFiles.length > availableSlots) {
+      setUploadError(`Seules les ${availableSlots} premiere(s) photo(s) peuvent etre ajoutees.`);
+    }
 
     try {
       setIsReading(true);
-      const nextImages = await Promise.all(selectedFiles.map(readFile));
+      const nextImages: string[] = [];
+      for (const file of selectedFiles) {
+        nextImages.push(await optimizeProductImage(file));
+      }
       setPendingImages(nextImages);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Impossible de preparer ces photos.");
     } finally {
       setIsReading(false);
     }
@@ -101,8 +108,16 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
         <span className="mt-3 text-sm font-bold text-white">
           {isReading ? "Import en cours..." : "Déposer les photos ici"}
         </span>
-        <span className="mt-1 text-xs text-zinc-500">JPG, PNG ou WEBP · 8 images max</span>
+        <span className="mt-1 text-xs text-zinc-500">
+          JPG, PNG ou WEBP · {MAX_PRODUCT_IMAGES} images max · compression automatique
+        </span>
       </label>
+
+      {uploadError && (
+        <p className="rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm font-semibold text-red-100">
+          {uploadError}
+        </p>
+      )}
 
       {images.length > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

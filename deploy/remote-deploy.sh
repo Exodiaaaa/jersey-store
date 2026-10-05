@@ -8,6 +8,9 @@ env_file="${KVN_ENV_FILE:-${app_dir}/.env.production}"
 release_env_file="${KVN_RELEASE_ENV_FILE:-${app_dir}/.release.env}"
 compose_file="${KVN_COMPOSE_FILE:-${app_dir}/docker-compose.deploy.yml}"
 backup_script="${app_dir}/deploy/backup-db.sh"
+nginx_upload_source="${app_dir}/deploy/nginx-product-uploads.conf"
+nginx_upload_target="/etc/nginx/snippets/kvn-footwear-product-uploads.conf"
+nginx_site="/etc/nginx/sites-available/kvn-footwear"
 image_ref="${1:-}"
 
 fail() {
@@ -20,9 +23,62 @@ fail() {
 [[ -r "$env_file" ]] || fail "Fichier d'environnement introuvable: $env_file"
 [[ -r "$compose_file" ]] || fail "Fichier Compose introuvable: $compose_file"
 [[ -r "$backup_script" ]] || fail "Script de sauvegarde introuvable: $backup_script"
+[[ -r "$nginx_upload_source" ]] || fail "Configuration des uploads Nginx introuvable: $nginx_upload_source"
+[[ -r "$nginx_site" ]] || fail "Site Nginx introuvable: $nginx_site"
 [[ -s "${app_dir}/secrets/admin_jwt_secret" ]] || fail "Secret JWT admin introuvable."
 command -v docker >/dev/null 2>&1 || fail "Docker est introuvable."
 command -v curl >/dev/null 2>&1 || fail "curl est introuvable."
+command -v nginx >/dev/null 2>&1 || fail "Nginx est introuvable."
+
+configure_nginx_upload_limit() {
+  local site_backup snippet_backup had_snippet=false
+  site_backup="$(mktemp)"
+  snippet_backup="$(mktemp)"
+  cp -- "$nginx_site" "$site_backup"
+
+  if [[ -e "$nginx_upload_target" ]]; then
+    cp -- "$nginx_upload_target" "$snippet_backup"
+    had_snippet=true
+  fi
+
+  restore_nginx_configuration() {
+    cp -- "$site_backup" "$nginx_site"
+    if [[ "$had_snippet" == true ]]; then
+      cp -- "$snippet_backup" "$nginx_upload_target"
+    else
+      rm -f -- "$nginx_upload_target"
+    fi
+  }
+
+  install -d -m 755 /etc/nginx/snippets
+  install -m 644 "$nginx_upload_source" "$nginx_upload_target"
+
+  if ! grep -Fq "include $nginx_upload_target;" "$nginx_site"; then
+    if grep -Eq '^[[:space:]]*client_max_body_size[[:space:]]+' "$nginx_site"; then
+      sed -Ei "s|^[[:space:]]*client_max_body_size[[:space:]]+[^;]+;|    include $nginx_upload_target;|" "$nginx_site"
+    else
+      sed -Ei "/^[[:space:]]*server_name[[:space:]]+kvnfootwear[.]ma[[:space:]]+www[.]kvnfootwear[.]ma;/a\\    include $nginx_upload_target;" "$nginx_site"
+    fi
+  fi
+
+  if ! grep -Fq "include $nginx_upload_target;" "$nginx_site" || ! nginx -t; then
+    restore_nginx_configuration
+    nginx -t || true
+    rm -f -- "$site_backup" "$snippet_backup"
+    fail "La mise a jour Nginx a echoue; la configuration precedente a ete restauree."
+  fi
+
+  if ! systemctl reload nginx; then
+    restore_nginx_configuration
+    nginx -t && systemctl reload nginx || true
+    rm -f -- "$site_backup" "$snippet_backup"
+    fail "Le rechargement Nginx a echoue; la configuration precedente a ete restauree."
+  fi
+
+  rm -f -- "$site_backup" "$snippet_backup"
+}
+
+configure_nginx_upload_limit
 
 cd "$app_dir"
 

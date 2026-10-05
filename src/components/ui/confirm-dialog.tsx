@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,12 +25,17 @@ export function ConfirmDialog({
   title,
   tone = "default",
 }: ConfirmDialogProps) {
+  const titleId = useId();
+  const descriptionId = useId();
+
   if (!isOpen) {
     return null;
   }
 
   return (
     <div
+      aria-describedby={descriptionId}
+      aria-labelledby={titleId}
       aria-modal="true"
       className="fixed inset-0 z-50 grid place-items-center bg-black/72 px-4 backdrop-blur-sm"
       role="dialog"
@@ -47,8 +53,12 @@ export function ConfirmDialog({
             <AlertTriangle size={22} />
           </span>
           <div>
-            <h2 className="text-lg font-black text-white">{title}</h2>
-            <p className="mt-2 text-sm leading-6 text-zinc-400">{description}</p>
+            <h2 className="text-lg font-black text-white" id={titleId}>
+              {title}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-400" id={descriptionId}>
+              {description}
+            </p>
           </div>
         </div>
 

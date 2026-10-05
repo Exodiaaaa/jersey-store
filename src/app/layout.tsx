@@ -28,7 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+      lang="fr"
+    >
       <body className="min-h-full bg-[#090a0c] text-zinc-50">
         <CartProvider>
           <SiteEffects />

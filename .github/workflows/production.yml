@@ -149,6 +149,7 @@ jobs:
             deploy/install-backup-timer.sh \
             deploy/kvn-footwear-backup.service \
             deploy/kvn-footwear-backup.timer \
+            deploy/nginx-product-uploads.conf \
             deploy/remote-deploy.sh \
             "$VPS_USER@$VPS_HOST:$remote_dir/"
           ssh "$VPS_USER@$VPS_HOST" "
@@ -158,8 +159,9 @@ jobs:
             sudo install -m 750 '$remote_dir/install-backup-timer.sh' /var/www/kvn-footwear/deploy/install-backup-timer.sh &&
             sudo install -m 644 '$remote_dir/kvn-footwear-backup.service' /var/www/kvn-footwear/deploy/kvn-footwear-backup.service &&
             sudo install -m 644 '$remote_dir/kvn-footwear-backup.timer' /var/www/kvn-footwear/deploy/kvn-footwear-backup.timer &&
+            sudo install -m 644 '$remote_dir/nginx-product-uploads.conf' /var/www/kvn-footwear/deploy/nginx-product-uploads.conf &&
             sudo install -m 750 '$remote_dir/remote-deploy.sh' /var/www/kvn-footwear/deploy/remote-deploy.sh &&
-            rm -f '$remote_dir/docker-compose.deploy.yml' '$remote_dir/backup-db.sh' '$remote_dir/install-backup-timer.sh' '$remote_dir/kvn-footwear-backup.service' '$remote_dir/kvn-footwear-backup.timer' '$remote_dir/remote-deploy.sh' &&
+            rm -f '$remote_dir/docker-compose.deploy.yml' '$remote_dir/backup-db.sh' '$remote_dir/install-backup-timer.sh' '$remote_dir/kvn-footwear-backup.service' '$remote_dir/kvn-footwear-backup.timer' '$remote_dir/nginx-product-uploads.conf' '$remote_dir/remote-deploy.sh' &&
             rmdir '$remote_dir'
           "
 
