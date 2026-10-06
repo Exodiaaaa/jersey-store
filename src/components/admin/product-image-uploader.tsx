@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, DragEvent, useState } from "react";
-import { ImagePlus, Trash2, UploadCloud } from "lucide-react";
+import { ImagePlus, Star, Trash2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Label } from "@/components/ui/field";
@@ -64,6 +64,12 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
 
   const removeImage = (index: number) => {
     onChange(images.filter((_, currentIndex) => currentIndex !== index));
+  };
+
+  const makePrimary = (index: number) => {
+    const nextImages = [...images];
+    const [primaryImage] = nextImages.splice(index, 1);
+    onChange([primaryImage, ...nextImages]);
   };
 
   const confirmAddImages = () => {
@@ -129,7 +135,20 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
                 role="img"
                 style={{ backgroundImage: `url("${src.replace(/"/g, "%22")}")` }}
               />
+              {index > 0 && (
+                <Button
+                  aria-label={`Définir photo ${index + 1} comme principale`}
+                  className="absolute left-2 top-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                  onClick={() => makePrimary(index)}
+                  size="icon"
+                  type="button"
+                  variant="secondary"
+                >
+                  <Star size={15} />
+                </Button>
+              )}
               <Button
+                aria-label={`Supprimer photo ${index + 1}`}
                 className="absolute right-2 top-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                 onClick={() => setDeleteIndex(index)}
                 size="icon"

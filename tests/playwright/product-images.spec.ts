@@ -75,3 +75,28 @@ test("conserve sans perte une photo deja assez legere", async ({ baseURL, page }
   await expect(preview).toBeVisible();
   await expect(preview).toHaveAttribute("style", /data:image\/png;base64/);
 });
+
+test("permet de choisir la photo principale", async ({ baseURL, page }) => {
+  await openProductCreation(page, baseURL);
+
+  const onePixelPng = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZlGQAAAAASUVORK5CYII=",
+    "base64",
+  );
+  const replacementPhoto = Buffer.concat([onePixelPng, Buffer.from("replacement")]);
+
+  for (const [name, buffer] of [
+    ["ancienne.png", onePixelPng],
+    ["nouvelle.png", replacementPhoto],
+  ] as const) {
+    await page.locator("#product-images").setInputFiles({ buffer, mimeType: "image/png", name });
+    const dialog = page.getByRole("dialog", { name: "Confirmer l'ajout de photos" });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Ajouter" }).click();
+  }
+
+  await page.getByRole("button", { name: "Définir photo 2 comme principale" }).click();
+
+  const primaryStyle = (await page.getByRole("img", { name: "Photo produit 1" }).getAttribute("style")) ?? "";
+  expect(primaryStyle).toContain(replacementPhoto.toString("base64"));
+});
