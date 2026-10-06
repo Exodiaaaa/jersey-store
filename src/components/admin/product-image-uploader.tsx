@@ -109,7 +109,7 @@ export function ProductImageUploader({ images, onChange }: ProductImageUploaderP
           {isReading ? "Import en cours..." : "Déposer les photos ici"}
         </span>
         <span className="mt-1 text-xs text-zinc-500">
-          JPG, PNG ou WEBP · {MAX_PRODUCT_IMAGES} images max · compression automatique
+          JPG, PNG ou WEBP · {MAX_PRODUCT_IMAGES} images max · optimisation haute qualité
         </span>
       </label>
 

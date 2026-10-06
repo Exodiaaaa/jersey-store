@@ -4,7 +4,10 @@ import {
   MAX_SOURCE_IMAGE_BYTES,
 } from "@/lib/product-images";
 
-const MAX_IMAGE_EDGE = 1600;
+const MAX_IMAGE_EDGE = 2560;
+const MIN_IMAGE_EDGE = 960;
+const RESIZE_FACTOR = 0.85;
+const WEBP_QUALITY_STEPS = [0.96, 0.92, 0.88, 0.84] as const;
 
 function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
   return new Promise<Blob>((resolve, reject) => {
@@ -57,13 +60,15 @@ export async function optimizeProductImage(file: File) {
       throw new Error("Les dimensions de cette photo sont invalides.");
     }
 
+    if (file.size <= MAX_OPTIMIZED_IMAGE_BYTES && Math.max(originalWidth, originalHeight) <= MAX_IMAGE_EDGE) {
+      return blobToDataUrl(file);
+    }
+
     const initialScale = Math.min(1, MAX_IMAGE_EDGE / Math.max(originalWidth, originalHeight));
     let width = Math.max(1, Math.round(originalWidth * initialScale));
     let height = Math.max(1, Math.round(originalHeight * initialScale));
-    let quality = 0.84;
-    let compressed: Blob | null = null;
 
-    for (let attempt = 0; attempt < 7; attempt += 1) {
+    for (let resizeAttempt = 0; resizeAttempt < 8; resizeAttempt += 1) {
       const canvas = document.createElement("canvas");
       canvas.width = width;
       canvas.height = height;
@@ -74,16 +79,22 @@ export async function optimizeProductImage(file: File) {
       context.imageSmoothingEnabled = true;
       context.imageSmoothingQuality = "high";
       context.drawImage(image, 0, 0, width, height);
-      compressed = await canvasToBlob(canvas, quality);
 
-      if (compressed.size <= MAX_OPTIMIZED_IMAGE_BYTES) {
-        return blobToDataUrl(compressed);
+      for (const quality of WEBP_QUALITY_STEPS) {
+        const compressed = await canvasToBlob(canvas, quality);
+
+        if (compressed.size <= MAX_OPTIMIZED_IMAGE_BYTES) {
+          return blobToDataUrl(compressed);
+        }
       }
 
-      const nextScale = Math.max(width, height) > 640 ? 0.82 : 1;
+      const currentEdge = Math.max(width, height);
+      if (currentEdge <= MIN_IMAGE_EDGE) break;
+
+      const nextEdge = Math.max(MIN_IMAGE_EDGE, Math.round(currentEdge * RESIZE_FACTOR));
+      const nextScale = nextEdge / currentEdge;
       width = Math.max(1, Math.round(width * nextScale));
       height = Math.max(1, Math.round(height * nextScale));
-      quality = Math.max(0.55, quality - 0.06);
     }
 
     throw new Error("Cette photo reste trop volumineuse apres compression. Choisissez une autre photo.");

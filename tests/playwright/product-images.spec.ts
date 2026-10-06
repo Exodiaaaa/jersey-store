@@ -5,7 +5,7 @@ import { mockShopApi } from "./fixtures";
 
 const playwrightJwtSecret = "playwright-jwt-secret-with-at-least-32-characters";
 
-test("compresse une photo volumineuse avant de l'ajouter au produit", async ({ baseURL, page }) => {
+async function openProductCreation(page: import("@playwright/test").Page, baseURL: string | undefined) {
   process.env.ADMIN_JWT_SECRET = playwrightJwtSecret;
   const token = await createAdminSessionToken({
     adminId: "admin-images",
@@ -22,6 +22,10 @@ test("compresse une photo volumineuse avant de l'ajouter au produit", async ({ b
   ]);
   await mockShopApi(page);
   await page.goto("/admin/produits/nouveau");
+}
+
+test("compresse une photo volumineuse avant de l'ajouter au produit", async ({ baseURL, page }) => {
+  await openProductCreation(page, baseURL);
 
   const onePixelPng = Buffer.from(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZlGQAAAAASUVORK5CYII=",
@@ -47,4 +51,27 @@ test("compresse une photo volumineuse avant de l'ajouter au produit", async ({ b
 
   expect(encodedImage.length).toBeGreaterThan(0);
   expect(approximateBytes).toBeLessThanOrEqual(MAX_OPTIMIZED_IMAGE_BYTES);
+});
+
+test("conserve sans perte une photo deja assez legere", async ({ baseURL, page }) => {
+  await openProductCreation(page, baseURL);
+
+  const onePixelPng = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZlGQAAAAASUVORK5CYII=",
+    "base64",
+  );
+
+  await page.locator("#product-images").setInputFiles({
+    buffer: onePixelPng,
+    mimeType: "image/png",
+    name: "photo-originale.png",
+  });
+
+  const dialog = page.getByRole("dialog", { name: "Confirmer l'ajout de photos" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Ajouter" }).click();
+
+  const preview = page.getByRole("img", { name: "Photo produit 1" });
+  await expect(preview).toBeVisible();
+  await expect(preview).toHaveAttribute("style", /data:image\/png;base64/);
 });

@@ -11,7 +11,7 @@ type ProductMediaProps = {
 
 function imageStyle(src: string) {
   return {
-    backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.24)), url("${src.replace(/"/g, "%22")}")`,
+    backgroundImage: `url("${src.replace(/"/g, "%22")}")`,
   };
 }
 
@@ -48,8 +48,6 @@ export function ProductMedia({ name, images = [], image, className = "" }: Produ
       ].join(" ")}
       role="img"
       style={imageStyle(src)}
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(255,255,255,0.16),transparent_28%)]" />
-    </div>
+    />
   );
 }
