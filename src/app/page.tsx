@@ -368,27 +368,14 @@ export default function Home() {
     <div className="bg-[#090a0c] text-white">
       <section className="relative isolate min-h-[calc(100vh-5rem)] overflow-hidden bg-[#111318]">
         {heroImage && (
-          // Product photos are already optimized during upload. Keeping their
-          // intrinsic size prevents portrait shots from being enlarged and
-          // softened across an entire desktop viewport.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt=""
+          <div
             aria-hidden="true"
-            className="absolute bottom-0 right-0 max-h-full max-w-full object-contain object-right transition-opacity duration-1000"
-            data-testid="hero-product-image"
-            fetchPriority="high"
-            src={heroImage}
+            className="kvn-parallax absolute inset-0 bg-cover bg-center transition-all duration-1000"
+            style={{
+              backgroundImage: `linear-gradient(90deg, rgba(6,6,7,0.94), rgba(6,6,7,0.62) 45%, rgba(6,6,7,0.24)), linear-gradient(180deg, rgba(6,6,7,0.22), rgba(6,6,7,0.96)), url("${heroImage.replace(/"/g, "%22")}")`,
+            }}
           />
         )}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "linear-gradient(90deg, rgba(6,6,7,0.97), rgba(6,6,7,0.78) 42%, rgba(6,6,7,0.30) 72%, rgba(6,6,7,0.08)), linear-gradient(180deg, rgba(6,6,7,0.10), rgba(6,6,7,0.88))",
-          }}
-        />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_25%,rgba(217,221,226,0.16),transparent_28%)]" />
         <div className="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl content-center px-4 py-14 sm:px-6 lg:px-8">
           <div className="kvn-reveal max-w-3xl">

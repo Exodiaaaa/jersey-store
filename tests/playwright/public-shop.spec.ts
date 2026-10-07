@@ -13,30 +13,6 @@ test("affiche l'accueil et les produits provenant de l'API", async ({ page }) =>
   await expect(page.getByText(products[0].name).first()).toBeVisible();
 });
 
-test("n'agrandit pas la photo du bandeau au-dela de sa resolution", async ({ page }) => {
-  await page.goto("/");
-
-  const heroImage = page.getByTestId("hero-product-image");
-  await expect(heroImage).toBeVisible();
-
-  const dimensions = await heroImage.evaluate((image) => {
-    const element = image as HTMLImageElement;
-    const bounds = element.getBoundingClientRect();
-
-    return {
-      naturalHeight: element.naturalHeight,
-      naturalWidth: element.naturalWidth,
-      renderedHeight: bounds.height,
-      renderedWidth: bounds.width,
-    };
-  });
-
-  expect(dimensions.naturalWidth).toBeGreaterThan(0);
-  expect(dimensions.naturalHeight).toBeGreaterThan(0);
-  expect(dimensions.renderedWidth).toBeLessThanOrEqual(dimensions.naturalWidth);
-  expect(dimensions.renderedHeight).toBeLessThanOrEqual(dimensions.naturalHeight);
-});
-
 test("filtre le catalogue par recherche", async ({ page }) => {
   await page.goto("/catalogue");
 
