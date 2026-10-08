@@ -1,4 +1,6 @@
+import { randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
+import sharp from "sharp";
 import { adminSessionCookieName, createAdminSessionToken } from "../../src/lib/admin-jwt";
 import { MAX_OPTIMIZED_IMAGE_BYTES } from "../../src/lib/product-images";
 import { mockShopApi } from "./fixtures";
@@ -74,6 +76,38 @@ test("conserve sans perte une photo deja assez legere", async ({ baseURL, page }
   const preview = page.getByRole("img", { name: "Photo produit 1" });
   await expect(preview).toBeVisible();
   await expect(preview).toHaveAttribute("style", /data:image\/png;base64/);
+});
+
+test("adapte une photo detaillee qui depasse encore la limite a 960 px", async ({ baseURL, page }) => {
+  await openProductCreation(page, baseURL);
+
+  const width = 960;
+  const height = 960;
+  const detailedPhoto = await sharp(randomBytes(width * height * 4), {
+    raw: { channels: 4, height, width },
+  })
+    .png({ compressionLevel: 0 })
+    .toBuffer();
+
+  await page.locator("#product-images").setInputFiles({
+    buffer: detailedPhoto,
+    mimeType: "image/png",
+    name: "photo-mobile-detaillee.png",
+  });
+
+  const dialog = page.getByRole("dialog", { name: "Confirmer l'ajout de photos" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Ajouter" }).click();
+
+  const preview = page.getByRole("img", { name: "Photo produit 1" });
+  await expect(preview).toBeVisible();
+  const style = (await preview.getAttribute("style")) ?? "";
+  const encodedImage = style.match(/data:image\/[^;]+;base64,([^"]+)/)?.[1] ?? "";
+  const approximateBytes = Math.floor((encodedImage.length * 3) / 4);
+
+  expect(encodedImage.length).toBeGreaterThan(0);
+  expect(approximateBytes).toBeLessThanOrEqual(MAX_OPTIMIZED_IMAGE_BYTES);
+  await expect(page.getByText(/reste trop volumineuse/i)).toHaveCount(0);
 });
 
 test("permet de choisir la photo principale", async ({ baseURL, page }) => {

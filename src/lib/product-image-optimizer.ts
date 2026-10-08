@@ -5,9 +5,9 @@ import {
 } from "@/lib/product-images";
 
 const MAX_IMAGE_EDGE = 2560;
-const MIN_IMAGE_EDGE = 960;
+const MIN_IMAGE_EDGE = 720;
 const RESIZE_FACTOR = 0.85;
-const WEBP_QUALITY_STEPS = [0.96, 0.92, 0.88, 0.84] as const;
+const WEBP_QUALITY_STEPS = [0.96, 0.92, 0.88, 0.84, 0.8, 0.76, 0.72] as const;
 
 function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
   return new Promise<Blob>((resolve, reject) => {
