@@ -1,4 +1,5 @@
 import { ImagePlus } from "lucide-react";
+import Image from "next/image";
 import { ProductVisual } from "@/lib/types";
 
 type ProductMediaProps = {
@@ -7,6 +8,7 @@ type ProductMediaProps = {
   images?: string[];
   image?: string;
   className?: string;
+  loading?: "eager" | "lazy";
 };
 
 function imageStyle(src: string) {
@@ -15,7 +17,7 @@ function imageStyle(src: string) {
   };
 }
 
-export function ProductMedia({ name, images = [], image, className = "" }: ProductMediaProps) {
+export function ProductMedia({ name, images = [], image, className = "", loading }: ProductMediaProps) {
   const src = image ?? images[0];
 
   if (!src) {
@@ -35,6 +37,28 @@ export function ProductMedia({ name, images = [], image, className = "" }: Produ
         <span className="mt-1 max-w-44 text-xs leading-5 text-white/48">
           Deposez les vraies photos du produit dans le back office.
         </span>
+      </div>
+    );
+  }
+
+  const canOptimize = src.startsWith("/");
+
+  if (canOptimize) {
+    return (
+      <div
+        className={[
+          "relative isolate aspect-[4/5] overflow-hidden rounded-[4px] border border-white/10 bg-[#060607]",
+          className,
+        ].join(" ")}
+      >
+        <Image
+          alt={name}
+          className="object-cover"
+          fill
+          loading={loading}
+          sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) 50vw, 25vw"
+          src={src}
+        />
       </div>
     );
   }

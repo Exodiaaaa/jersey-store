@@ -10,9 +10,10 @@ import { PriceDisplay } from "@/components/product/price-display";
 type ProductCardProps = {
   product: Product;
   className?: string;
+  imageLoading?: "eager" | "lazy";
 };
 
-export function ProductCard({ product, className = "" }: ProductCardProps) {
+export function ProductCard({ product, className = "", imageLoading }: ProductCardProps) {
   const priceInfo = getProductPriceInfo(product, getDefaultProductType(product));
   const hasPromo = Boolean(priceInfo.originalPrice);
 
@@ -26,6 +27,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
       <Link className="relative block" href={`/produit/${product.slug}`}>
         <ProductMedia
           className="rounded-none border-0 transition duration-500 group-hover:scale-[1.03]"
+          loading={imageLoading}
           images={product.images}
           name={product.name}
           visual={product.visual}

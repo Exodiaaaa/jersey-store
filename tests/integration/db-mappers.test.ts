@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { mapDbHomeSection, mapDbOrder, mapDbProduct } from "../../src/lib/db-mappers";
+import { mapDbHomeSection, mapDbOrder, mapDbProduct, mapDbProductSummary } from "../../src/lib/db-mappers";
 import { makeDbOrder, makeDbProduct } from "../helpers/fixtures";
 
 describe("db mappers", () => {
@@ -25,6 +25,20 @@ describe("db mappers", () => {
     assert.equal(product.stock.S, 4);
     assert.equal(product.visual.pattern, "clean");
     assert.equal(product.createdAt, "2026-04-16T12:00:00.000Z");
+  });
+
+  test("remplace les photos base64 par une URL legere dans les listes", () => {
+    const product = mapDbProductSummary(
+      makeDbProduct({
+        images: [
+          { id: 22, url: "data:image/webp;base64,photo-secondaire", sortOrder: 2 },
+          { id: 11, url: "data:image/webp;base64,photo-principale", sortOrder: 1 },
+        ],
+      }),
+    );
+
+    assert.deepEqual(product.images, ["/api/product-images/11"]);
+    assert.equal(JSON.stringify(product).includes("base64"), false);
   });
 
   test("mappe les commandes et remplace un statut inconnu par new", () => {

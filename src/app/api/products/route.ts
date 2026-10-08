@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 import { mapDbProduct } from "@/lib/db-mappers";
+import { getStorefrontProducts } from "@/lib/storefront-data";
 import { Product } from "@/lib/types";
 import { getProductSaleConfiguration, getProductSaleMode } from "@/lib/product-sales";
 import {
@@ -46,12 +47,7 @@ function productPayload(product: Product) {
 }
 
 export async function GET() {
-  const products = await prisma.product.findMany({
-    include: productInclude,
-    orderBy: { createdAt: "desc" },
-  });
-
-  return NextResponse.json(products.map(mapDbProduct));
+  return NextResponse.json(await getStorefrontProducts());
 }
 
 export async function POST(request: Request) {

@@ -24,7 +24,7 @@ type DbProduct = {
   isPopular: boolean;
   allowFlocking: boolean;
   createdAt: Date;
-  images: Array<{ url: string; sortOrder: number }>;
+  images: Array<{ id?: number; url?: string; sortOrder: number }>;
   stocks: Array<{ size: string; quantity: number }>;
 };
 
@@ -126,7 +126,7 @@ export function mapDbProduct(product: DbProduct): Product {
     description: product.description,
     sizes,
     stock,
-    images: sortedImages.map((image) => image.url),
+    images: sortedImages.flatMap((image) => (image.url ? [image.url] : [])),
     visual: {
       primary: product.visualPrimary,
       secondary: product.visualSecondary,
@@ -137,6 +137,16 @@ export function mapDbProduct(product: DbProduct): Product {
     isPopular: product.isPopular,
     allowFlocking: product.allowFlocking,
     createdAt: product.createdAt.toISOString(),
+  };
+}
+
+export function mapDbProductSummary(product: DbProduct): Product {
+  const mappedProduct = mapDbProduct(product);
+  const primaryImage = [...product.images].sort((a, b) => a.sortOrder - b.sortOrder)[0];
+
+  return {
+    ...mappedProduct,
+    images: typeof primaryImage?.id === "number" ? [`/api/product-images/${primaryImage.id}`] : [],
   };
 }
 
@@ -159,6 +169,21 @@ export function mapDbHomeSection(section: DbHomeSection): HomeSection {
     sortOrder: section.sortOrder,
     productIds: sortedProducts.map((item) => item.productId),
     products: sortedProducts.map((item) => mapDbProduct(item.product)),
+    createdAt: section.createdAt.toISOString(),
+  };
+}
+
+export function mapDbHomeSectionSummary(section: DbHomeSection): HomeSection {
+  const sortedProducts = [...section.products].sort((a, b) => a.sortOrder - b.sortOrder);
+
+  return {
+    id: section.id,
+    title: section.title,
+    subtitle: section.subtitle ?? undefined,
+    isActive: section.isActive,
+    sortOrder: section.sortOrder,
+    productIds: sortedProducts.map((item) => item.productId),
+    products: sortedProducts.map((item) => mapDbProductSummary(item.product)),
     createdAt: section.createdAt.toISOString(),
   };
 }

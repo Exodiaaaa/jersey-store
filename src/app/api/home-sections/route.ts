@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 import { mapDbHomeSection } from "@/lib/db-mappers";
+import { getStorefrontHomeSections } from "@/lib/storefront-data";
 import { HomeSectionInput } from "@/lib/types";
 
 const productInclude = {
@@ -44,12 +45,7 @@ async function createSectionId(title: string) {
 }
 
 export async function GET() {
-  const sections = await prisma.homeSection.findMany({
-    include: homeSectionInclude,
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-  });
-
-  return NextResponse.json(sections.map(mapDbHomeSection));
+  return NextResponse.json(await getStorefrontHomeSections());
 }
 
 export async function POST(request: Request) {
