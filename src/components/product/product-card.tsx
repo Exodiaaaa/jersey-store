@@ -20,7 +20,7 @@ export function ProductCard({ product, className = "", imageLoading }: ProductCa
   return (
     <article
       className={[
-        "kvn-reveal kvn-card-lift group overflow-hidden rounded-[4px] bg-[#111318] shadow-[0_16px_42px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:bg-[#060607]",
+        "kvn-card-lift group overflow-hidden rounded-[4px] bg-[#111318] shadow-[0_16px_42px_rgba(0,0,0,0.22)] transition hover:-translate-y-1 hover:bg-[#060607]",
         className,
       ].join(" ")}
     >

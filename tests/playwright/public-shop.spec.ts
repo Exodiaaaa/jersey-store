@@ -26,6 +26,23 @@ test("filtre le catalogue par recherche", async ({ page }) => {
   await expect(page.getByText("Pack Real Madrid Home")).toHaveCount(0);
 });
 
+test("affiche les produits sans scroll apres une categorie vide", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 700 });
+  await page.goto("/catalogue");
+
+  const category = page.getByLabel("Categorie");
+  await category.selectOption("empty");
+  await expect(page.getByText("0 produit(s)")).toBeVisible();
+
+  await category.selectOption("jersey");
+  await expect(page.getByText("1 produit(s)")).toBeVisible();
+
+  const productCard = page.locator("article").filter({ hasText: "Maillot Arsenal Away" });
+  await expect(productCard).toHaveCount(1);
+  const opacity = await productCard.evaluate((element) => window.getComputedStyle(element).opacity);
+  expect(opacity).toBe("1");
+});
+
 test("ajoute un produit au panier depuis une fiche produit", async ({ page }) => {
   await page.goto(`/produit/${products[0].slug}`);
 

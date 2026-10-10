@@ -64,6 +64,11 @@ export const products: Product[] = [
 
 const categories: Category[] = [
   {
+    id: "empty",
+    name: "Categorie vide",
+    description: "Categorie sans produit pour les tests de filtrage.",
+  },
+  {
     id: "jersey",
     name: "Maillot seul",
     description: "Maillots premium avec coupe sportive.",
