@@ -44,20 +44,21 @@ function drawImage(image: HTMLImageElement, width: number, height: number, backg
 }
 
 async function encodeImage(image: HTMLImageElement, width: number, height: number) {
-  const canvases = {
-    "image/jpeg": drawImage(image, width, height, "#fff"),
-    "image/webp": drawImage(image, width, height),
-  } satisfies Record<(typeof OUTPUT_TYPES)[number], HTMLCanvasElement>;
+  for (const type of OUTPUT_TYPES) {
+    const canvas = drawImage(image, width, height, type === "image/jpeg" ? "#fff" : undefined);
 
-  for (const quality of QUALITY_STEPS) {
-    for (const type of OUTPUT_TYPES) {
-      const compressed = await canvasToBlob(canvases[type], type, quality);
+    for (const quality of QUALITY_STEPS) {
+      const compressed = await canvasToBlob(canvas, type, quality);
 
       // Certains navigateurs retournent un PNG quand l'encodage WEBP n'est pas disponible.
       // Dans ce cas, on ignore ce resultat et on utilise le JPEG, pris en charge partout.
-      if (compressed.type.toLowerCase() !== type) continue;
+      if (compressed.type.toLowerCase() !== type) break;
       if (compressed.size <= MAX_OPTIMIZED_IMAGE_BYTES) return compressed;
     }
+
+    // Libere la grande surface avant d'essayer le format suivant sur les telephones.
+    canvas.width = 1;
+    canvas.height = 1;
   }
 
   return null;

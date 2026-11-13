@@ -137,7 +137,7 @@ test("utilise JPEG si le navigateur mobile ne sait pas encoder en WEBP", async (
   await page.locator("#product-images").setInputFiles({
     buffer: phonePhoto,
     mimeType: "image/jpeg",
-    name: "photo-iphone-detaillee.jpeg",
+    name: "photo-mobile-detaillee.jpeg",
   });
 
   const dialog = page.getByRole("dialog", { name: "Confirmer l'ajout de photos" });
