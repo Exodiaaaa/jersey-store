@@ -4,22 +4,63 @@ import {
   MAX_SOURCE_IMAGE_BYTES,
 } from "@/lib/product-images";
 
-const MAX_IMAGE_EDGE = 2560;
-const MIN_IMAGE_EDGE = 720;
-const RESIZE_FACTOR = 0.85;
-const WEBP_QUALITY_STEPS = [0.96, 0.92, 0.88, 0.84, 0.8, 0.76, 0.72] as const;
+const MAX_IMAGE_EDGE = 3200;
+const MIN_IMAGE_EDGE = 1440;
+const RESIZE_FACTOR = 0.88;
+const QUALITY_STEPS = [0.96, 0.92, 0.88, 0.84, 0.8, 0.76] as const;
+const OUTPUT_TYPES = ["image/webp", "image/jpeg"] as const;
 
-function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
+function canvasToBlob(canvas: HTMLCanvasElement, type: (typeof OUTPUT_TYPES)[number], quality: number) {
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
         if (blob) resolve(blob);
         else reject(new Error("La compression de la photo a echoue."));
       },
-      "image/webp",
+      type,
       quality,
     );
   });
+}
+
+function drawImage(image: HTMLImageElement, width: number, height: number, background?: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("La compression des photos n'est pas disponible sur ce navigateur.");
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+
+  if (background) {
+    context.fillStyle = background;
+    context.fillRect(0, 0, width, height);
+  }
+
+  context.drawImage(image, 0, 0, width, height);
+  return canvas;
+}
+
+async function encodeImage(image: HTMLImageElement, width: number, height: number) {
+  const canvases = {
+    "image/jpeg": drawImage(image, width, height, "#fff"),
+    "image/webp": drawImage(image, width, height),
+  } satisfies Record<(typeof OUTPUT_TYPES)[number], HTMLCanvasElement>;
+
+  for (const quality of QUALITY_STEPS) {
+    for (const type of OUTPUT_TYPES) {
+      const compressed = await canvasToBlob(canvases[type], type, quality);
+
+      // Certains navigateurs retournent un PNG quand l'encodage WEBP n'est pas disponible.
+      // Dans ce cas, on ignore ce resultat et on utilise le JPEG, pris en charge partout.
+      if (compressed.type.toLowerCase() !== type) continue;
+      if (compressed.size <= MAX_OPTIMIZED_IMAGE_BYTES) return compressed;
+    }
+  }
+
+  return null;
 }
 
 function blobToDataUrl(blob: Blob) {
@@ -68,25 +109,9 @@ export async function optimizeProductImage(file: File) {
     let width = Math.max(1, Math.round(originalWidth * initialScale));
     let height = Math.max(1, Math.round(originalHeight * initialScale));
 
-    for (let resizeAttempt = 0; resizeAttempt < 8; resizeAttempt += 1) {
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-
-      const context = canvas.getContext("2d");
-      if (!context) throw new Error("La compression des photos n'est pas disponible sur ce navigateur.");
-
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
-      context.drawImage(image, 0, 0, width, height);
-
-      for (const quality of WEBP_QUALITY_STEPS) {
-        const compressed = await canvasToBlob(canvas, quality);
-
-        if (compressed.size <= MAX_OPTIMIZED_IMAGE_BYTES) {
-          return blobToDataUrl(compressed);
-        }
-      }
+    for (let resizeAttempt = 0; resizeAttempt < 10; resizeAttempt += 1) {
+      const compressed = await encodeImage(image, width, height);
+      if (compressed) return blobToDataUrl(compressed);
 
       const currentEdge = Math.max(width, height);
       if (currentEdge <= MIN_IMAGE_EDGE) break;

@@ -42,6 +42,7 @@ export function ProductMedia({ name, images = [], image, className = "", loading
   }
 
   const canOptimize = src.startsWith("/");
+  const isStoredProductImage = src.startsWith("/api/product-images/");
 
   if (canOptimize) {
     return (
@@ -58,6 +59,7 @@ export function ProductMedia({ name, images = [], image, className = "", loading
           loading={loading}
           sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) 50vw, 25vw"
           src={src}
+          unoptimized={isStoredProductImage}
         />
       </div>
     );

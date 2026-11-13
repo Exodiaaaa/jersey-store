@@ -110,6 +110,46 @@ test("adapte une photo detaillee qui depasse encore la limite a 960 px", async (
   await expect(page.getByText(/reste trop volumineuse/i)).toHaveCount(0);
 });
 
+test("utilise JPEG si le navigateur mobile ne sait pas encoder en WEBP", async ({ baseURL, page }) => {
+  await openProductCreation(page, baseURL);
+
+  await page.evaluate((maxBytes) => {
+    const originalToBlob = HTMLCanvasElement.prototype.toBlob;
+
+    HTMLCanvasElement.prototype.toBlob = function toBlob(callback, type, quality) {
+      if (type === "image/webp") {
+        callback(new Blob([new Uint8Array(maxBytes + 1)], { type: "image/png" }));
+        return;
+      }
+
+      originalToBlob.call(this, callback, type, quality);
+    };
+  }, MAX_OPTIMIZED_IMAGE_BYTES);
+
+  const width = 2000;
+  const height = 1500;
+  const phonePhoto = await sharp(randomBytes(width * height * 3), {
+    raw: { channels: 3, height, width },
+  })
+    .jpeg({ chromaSubsampling: "4:4:4", quality: 98 })
+    .toBuffer();
+
+  await page.locator("#product-images").setInputFiles({
+    buffer: phonePhoto,
+    mimeType: "image/jpeg",
+    name: "photo-iphone-detaillee.jpeg",
+  });
+
+  const dialog = page.getByRole("dialog", { name: "Confirmer l'ajout de photos" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Ajouter" }).click();
+
+  const preview = page.getByRole("img", { name: "Photo produit 1" });
+  await expect(preview).toBeVisible();
+  await expect(preview).toHaveAttribute("style", /data:image\/jpeg;base64/);
+  await expect(page.getByText(/reste trop volumineuse/i)).toHaveCount(0);
+});
+
 test("permet de choisir la photo principale", async ({ baseURL, page }) => {
   await openProductCreation(page, baseURL);
 

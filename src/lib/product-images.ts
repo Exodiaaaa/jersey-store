@@ -1,7 +1,7 @@
 export const MAX_PRODUCT_IMAGES = 8;
 export const MAX_SOURCE_IMAGE_BYTES = 15 * 1024 * 1024;
-export const MAX_OPTIMIZED_IMAGE_BYTES = 900 * 1024;
-export const MAX_PRODUCT_REQUEST_BYTES = 12 * 1024 * 1024;
+export const MAX_OPTIMIZED_IMAGE_BYTES = 1536 * 1024;
+export const MAX_PRODUCT_REQUEST_BYTES = 18 * 1024 * 1024;
 
 export const SUPPORTED_PRODUCT_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 

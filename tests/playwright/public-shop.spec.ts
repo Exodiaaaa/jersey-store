@@ -13,6 +13,30 @@ test("affiche l'accueil et les produits provenant de l'API", async ({ page }) =>
   await expect(page.getByText(products[0].name).first()).toBeVisible();
 });
 
+test("sert les photos produit stockees sans seconde compression", async ({ page }) => {
+  const storedImage = "/api/product-images/test-image";
+  const product = { ...products[0], images: [storedImage] };
+
+  await page.route(/\/api\/products$/, async (route) => {
+    await route.fulfill({ contentType: "application/json", json: [product] });
+  });
+  await page.route(/\/api\/product-images\/test-image$/, async (route) => {
+    await route.fulfill({
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZlGQAAAAASUVORK5CYII=",
+        "base64",
+      ),
+      contentType: "image/png",
+    });
+  });
+
+  await page.goto("/catalogue");
+
+  const image = page.getByRole("img", { name: product.name }).first();
+  await expect(image).toBeVisible();
+  await expect(image).toHaveAttribute("src", storedImage);
+});
+
 test("filtre le catalogue par recherche", async ({ page }) => {
   await page.goto("/catalogue");
 
